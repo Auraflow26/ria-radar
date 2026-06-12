@@ -55,9 +55,10 @@ const PROMPT_RULES = `You are writing a pre-meeting brief for an alternatives-di
 
 HARD RULES:
 1. Use ONLY facts present in the FIRM DATA below. Every dollar figure and percentage you write must appear verbatim in the data.
-2. Do NOT invent product names, platform approval statuses, clearing arrangements, or any firm-internal information.
-3. Write like a sharp salesperson briefing a colleague — concrete, direct, no filler.
-4. If a data point is missing, work around it; never guess a value.`
+2. Do NOT compute new numbers — no averages, per-client figures, ratios, or differences that are not already written in the data. If you want to convey scale, quote the figures as given.
+3. Do NOT invent product names, platform approval statuses, clearing arrangements, or any firm-internal information.
+4. Write like a sharp salesperson briefing a colleague — concrete, direct, no filler.
+5. If a data point is missing, work around it; never guess a value.`
 
 let client: Anthropic | null = null
 

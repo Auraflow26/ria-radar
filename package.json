@@ -1,0 +1,33 @@
+{
+  "name": "ria-radar",
+  "version": "0.1.0",
+  "description": "From 15,000 SEC Form ADV filings to a ranked RIA call list and meeting-ready briefs, in one command.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "pipeline": "tsx scripts/run.ts",
+    "ingest": "tsx scripts/run.ts --stage ingest",
+    "score": "tsx scripts/run.ts --stage score",
+    "enrich": "tsx scripts/run.ts --stage enrich",
+    "briefs": "tsx scripts/run.ts --stage briefs",
+    "validate": "tsx scripts/validate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@mozilla/readability": "^0.6.0",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.5",
+    "jsdom": "^25.0.1",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.10.0",
+    "@types/pdf-parse": "^1.1.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

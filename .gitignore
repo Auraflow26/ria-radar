@@ -1,0 +1,12 @@
+# secrets
+.env
+
+# dependencies
+node_modules/
+
+# pipeline cache (re-downloadable; large)
+data/
+
+# generated output is reproducible — except the committed sample snapshot
+output/*
+!output/sample/

@@ -78,7 +78,7 @@ export const FirmBriefSchema = z.object({
   positioning_summary: z.string(),
   alts_readiness_bullets: z.array(z.string()).min(2).max(5),
   current_alts_footprint: z.string(),
-  suggested_kkr_angle: z.string(),
+  suggested_angle: z.string(),
   conversation_starters: z.array(z.string()).length(3),
   caveats: z.array(z.string()).min(1),
 })

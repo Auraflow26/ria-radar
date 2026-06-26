@@ -23,7 +23,7 @@ const BRIEF_TOOL: Anthropic.Tool = {
         type: 'string',
         description: 'What the ADV filing and website say the firm already does in alternatives. If nothing, say so plainly.',
       },
-      suggested_kkr_angle: {
+      suggested_angle: {
         type: 'string',
         description:
           '2-3 sentences mapping the firm profile to an evergreen-vehicle conversation. NO claims about specific product approvals or platform clearing status — only what the public data supports.',
@@ -43,7 +43,7 @@ const BRIEF_TOOL: Anthropic.Tool = {
       'positioning_summary',
       'alts_readiness_bullets',
       'current_alts_footprint',
-      'suggested_kkr_angle',
+      'suggested_angle',
       'conversation_starters',
       'caveats',
     ],

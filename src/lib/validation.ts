@@ -110,9 +110,14 @@ export function runValidation(): Check[] {
         const briefBody = html.replace(/<[^>]+>/g, ' ')
         const normalize = (s: string) => s.replace(/[,\s]/g, '')
         const ctxNorm = normalize(context)
-        const figures = briefBody.match(/\$[\d,.]+\s*(?:billion|million|B|M)?/gi) ?? []
-        for (const fig of figures) {
-          if (!ctxNorm.includes(normalize(fig).replace(/(billion|million|B|M)$/i, ''))) {
+        // Every dollar figure AND every percentage must trace verbatim to source —
+        // a hallucinated "72% HNW" is as damaging as a hallucinated $-figure.
+        const dollarFigs = briefBody.match(/\$[\d,.]+\s*(?:billion|million|B|M)?/gi) ?? []
+        const pctFigs = briefBody.match(/\b\d{1,3}(?:\.\d+)?\s*%/g) ?? []
+        for (const fig of [...dollarFigs, ...pctFigs]) {
+          // strip a sentence-final period the regex greedily captured ("$465,000." → "$465000")
+          const probe = normalize(fig).replace(/(billion|million|B|M)$/i, '').replace(/\.$/, '')
+          if (!ctxNorm.includes(probe)) {
             hallucinated++
             offenders.push(`${file}: ${fig.trim()}`)
             break
@@ -120,9 +125,9 @@ export function runValidation(): Check[] {
         }
       }
       checks.push({
-        name: 'briefs: grounding ($-figures traceable to source)',
+        name: 'briefs: grounding (figures traceable to source)',
         status: hallucinated === 0 ? 'pass' : 'fail',
-        detail: hallucinated === 0 ? 'every dollar figure appears in its source context' : `ungrounded figures: ${offenders.join('; ')}`,
+        detail: hallucinated === 0 ? 'every dollar figure and percentage appears in its source context' : `ungrounded figures: ${offenders.join('; ')}`,
       })
     }
   }

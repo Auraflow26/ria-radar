@@ -77,7 +77,7 @@ export function skeletonBrief(s: ScoredFirm): FirmBrief {
       s.firm.advisesPrivateFunds && s.firm.privateFundCount
         ? `Advises ${s.firm.privateFundCount} private fund(s) per Form ADV Item 7.B.`
         : 'No private funds disclosed in Form ADV Item 7.B.',
-    suggested_kkr_angle: 'Generated without LLM (no API key) — see score components above for the data-driven angle.',
+    suggested_angle: 'Generated without LLM (no API key) — see score components above for the data-driven angle.',
     conversation_starters: [
       'How are you currently sourcing and diligencing private-market allocations?',
       'What role do semi-liquid or evergreen structures play in your client portfolios today?',
@@ -138,7 +138,7 @@ export function renderBriefHtml(
 <h2>Positioning</h2><p>${esc(brief.positioning_summary)}</p>
 <h2>Why they're alts-ready</h2><ul>${list(brief.alts_readiness_bullets)}</ul>
 <h2>Current alternatives footprint</h2><p>${esc(brief.current_alts_footprint)}</p>
-<h2>Suggested angle</h2><p>${esc(brief.suggested_kkr_angle)}</p>
+<h2>Suggested angle</h2><p>${esc(brief.suggested_angle)}</p>
 <h2>Conversation starters</h2><ul>${list(brief.conversation_starters)}</ul>
 <footer>
   Sources: SEC Form ADV public roster (snapshot ${esc(meta.snapshot)}, filing dated ${esc(f.filingDate ?? 'n/a')})${

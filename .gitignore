@@ -1,6 +1,10 @@
 # secrets
 .env
 
+# local-only prompt overrides (KKR product naming) — MUST never be committed
+*.local.ts
+*.local.prompt
+
 # dependencies
 node_modules/
 

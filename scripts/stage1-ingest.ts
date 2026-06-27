@@ -13,7 +13,7 @@ function inIngestScope(f: AdvFirm): boolean {
   return hasRetail
 }
 
-export async function runIngest(): Promise<void> {
+export async function runIngest(opts: { withBulk?: boolean } = {}): Promise<void> {
   console.log(`stage 1 — ingest (${CURRENT_MONTH.label} + ${PRIOR_MONTH.label})`)
 
   const currentCsv = await fetchMonthlyRoster(CURRENT_MONTH)
@@ -34,4 +34,10 @@ export async function runIngest(): Promise<void> {
     JSON.stringify({ snapshot: CURRENT_MONTH.label, prior: PRIOR_MONTH.label, rosterTotal: all.length, inScope: firms.length }),
   )
   console.log(`  ✓ data/firms.json (${firms.length.toLocaleString()}) + data/firms-prior.json (${prior.length.toLocaleString()})`)
+
+  if (opts.withBulk) {
+    console.log('  --with-bulk: building SEC structured Schedule D index (~1.4GB, STALE thru 2024-12)…')
+    const { buildBulkIndex } = await import('../src/lib/adv-bulk.js')
+    await buildBulkIndex() // writes data/schedule-d-bulk.json; stage 3 joins it as a fallback
+  }
 }

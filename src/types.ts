@@ -57,9 +57,20 @@ export interface ScoredFirm {
   enrichment?: Enrichment
 }
 
+export interface FundDetail {
+  peFunds: number | null
+  privateCreditFunds: number | null
+  realEstateFunds: number | null
+  hedgeFunds: number | null
+  totalPrivateFundGrossAssets: number | null
+}
+
 export interface Enrichment {
   custodians: { name: string; tier: 1 | 2; platformNote?: string }[]
-  custodianSource: 'adv-pdf' | 'none'
+  /** 'adv-pdf' = live latest filing; 'bulk-2024-12' = stale SEC structured data (caveat required) */
+  custodianSource: 'adv-pdf' | 'bulk-2024-12' | 'none'
+  /** Private-fund detail parsed from Schedule D 7.B of the live ADV PDF */
+  fundDetail?: FundDetail
   /** Evergreen/retail-alts vehicle structures found on the firm homepage */
   structureHits: string[]
   /** Competing alts managers found on the firm homepage (a BUY signal) */

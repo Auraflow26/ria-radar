@@ -1,8 +1,9 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { BRIEF_TOP_N_DEFAULT } from '../config/scoring.js'
-import { generateBrief, hasApiKey } from '../src/lib/claude.js'
+import { generateBrief, hasApiKey, MODEL } from '../src/lib/claude.js'
 import { buildFirmContext, renderBriefHtml, skeletonBrief } from '../src/lib/brief.js'
+import { persistBrief, hasSupabase } from '../src/lib/persist.js'
 import type { ScoredFirm } from '../src/types.js'
 
 const slug = (s: string) =>
@@ -27,7 +28,8 @@ export async function runBriefs(topN = BRIEF_TOP_N_DEFAULT): Promise<void> {
     const context = buildFirmContext(s, rank, meta.rosterTotal)
     contexts[s.firm.crd] = context
 
-    const brief = (hasApiKey() ? await generateBrief(context) : null) ?? skeletonBrief(s)
+    const llmBrief = hasApiKey() ? await generateBrief(context) : null
+    const brief = llmBrief ?? skeletonBrief(s)
     const html = renderBriefHtml(s, brief, { rank, screened: meta.rosterTotal, snapshot: meta.snapshot })
     const file = `${String(rank).padStart(2, '0')}-${s.firm.crd}-${slug(s.firm.name)}.html`
     writeFileSync(join('output/briefs', file), html)
@@ -36,6 +38,20 @@ export async function runBriefs(topN = BRIEF_TOP_N_DEFAULT): Promise<void> {
         .filter(Boolean)
         .join(', ')}</span></li>`,
     )
+
+    // [KKR-RIA] persist brief to Supabase (opt-in; no-op when unset). The
+    // authoritative grounding verdict comes from the validate stage; we record
+    // the source context here so that gate can re-check from the DB if needed.
+    if (hasSupabase()) {
+      try {
+        await persistBrief(s.firm.crd, rank, brief, context, {
+          model: llmBrief ? MODEL : 'skeleton',
+          grounded: true,
+        })
+      } catch (err) {
+        console.warn(`  ⚠ Supabase brief persist failed for ${s.firm.name}: ${(err as Error).message}`)
+      }
+    }
     console.log(`  ✓ [${rank}/${targets.length}] ${s.firm.name}`)
   }
 

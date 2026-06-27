@@ -21,10 +21,14 @@ export function htmlToText(html: string): string {
   }
 }
 
-/** Scan homepage text for retail-alts vehicle structures and competitor shelf traces. */
-export function scanForAltsLanguage(html: string): WebScan {
-  const text = htmlToText(html)
+/** Scan already-extracted page text (e.g. Apify markdown) for alts/competitor traces. */
+export function scanAltsText(text: string): WebScan {
   const structureHits = ALTS_STRUCTURE_PATTERNS.filter(k => k.pattern.test(text)).map(k => k.label)
   const competitorHits = COMPETITOR_PATTERNS.filter(k => k.pattern.test(text)).map(k => k.label)
   return { structureHits, competitorHits }
+}
+
+/** Scan homepage HTML for retail-alts vehicle structures and competitor shelf traces. */
+export function scanForAltsLanguage(html: string): WebScan {
+  return scanAltsText(htmlToText(html))
 }

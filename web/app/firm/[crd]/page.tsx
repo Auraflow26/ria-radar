@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabase, type Firm, type Brief, fmtMoney } from '@/lib/supabase'
+import { OutcomeLogger } from '@/components/OutcomeLogger'
 
 export const revalidate = 300
 
@@ -114,6 +115,8 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
           })}
         </div>
       </section>
+
+      <OutcomeLogger crd={f.crd} />
 
       {b && (
         <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(139,92,246,0.08)] pt-3">

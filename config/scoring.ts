@@ -72,6 +72,14 @@ export const SIGNALS: SignalDef[] = [
     rationale:
       'They already market private-markets capability — a warm conversation, not an education call.',
   },
+  {
+    key: 'feedback',
+    label: 'Coverage feedback',
+    weight: 5,
+    source: 'Logged call outcomes (kkr_ria_outcomes), neutral until data exists',
+    rationale:
+      'Closes the loop: real coverage outcomes nudge the rank. A firm that took a meeting or allocated earns lift; a confirmed not-a-fit dampens it. Neutral (no effect) until outcomes are logged.',
+  },
 ]
 
 /**

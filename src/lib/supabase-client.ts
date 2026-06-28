@@ -17,6 +17,24 @@ export function hasSupabase(): boolean {
 }
 
 /**
+ * Read all rows of selected columns from a table (PostgREST GET). Returns []
+ * when persistence is unconfigured. Read path uses the service key too (the
+ * pipeline is server-side); RLS would also allow anon, but we stay consistent.
+ */
+export async function selectAll<T>(table: string, columns: string): Promise<T[]> {
+  if (!hasSupabase()) return []
+  const endpoint = `${URL}/rest/v1/${table}?select=${encodeURIComponent(columns)}`
+  const res = await fetch(endpoint, {
+    headers: { apikey: SERVICE_KEY as string, Authorization: `Bearer ${SERVICE_KEY}` },
+  })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`Supabase select ${table} → HTTP ${res.status}: ${detail.slice(0, 300)}`)
+  }
+  return (await res.json()) as T[]
+}
+
+/**
  * Upsert rows into a table on the natural-key conflict target (PostgREST
  * `on_conflict`). Resolves silently when persistence is unconfigured; throws
  * only on an actual HTTP error so the caller can log-and-continue.

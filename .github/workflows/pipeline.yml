@@ -1,0 +1,70 @@
+# [KKR-RIA] Scheduled pipeline refresh — production roadmap step 4.
+# Quarterly (or on-demand) full run: ingest → score → enrich → briefs → persist
+# → validate. Secrets come from Doppler via a read-only service token; the
+# grounding gate is the hard gate — a red run fails the workflow.
+
+name: RIA Radar pipeline
+
+on:
+  schedule:
+    # 06:00 UTC on the 1st of Jan, Apr, Jul, Oct (quarterly, after month-end ADV roster posts)
+    - cron: '0 6 1 1,4,7,10 *'
+  workflow_dispatch:
+    inputs:
+      top:
+        description: 'Top-N for enrich + briefs'
+        required: false
+        default: '75'
+      with_bulk:
+        description: 'Include SEC structured bulk (slow, ~1.4GB)'
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: ria-radar-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
+      - name: Run pipeline (ingest → score → enrich → briefs → persist)
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          TOP="${{ github.event.inputs.top || '75' }}"
+          BULK=""
+          if [ "${{ github.event.inputs.with_bulk }}" = "true" ]; then BULK="--with-bulk"; fi
+          doppler run -- npx tsx scripts/run.ts $BULK --stage ingest,score
+          doppler run -- npx tsx scripts/run.ts --stage enrich --top "$TOP"
+          doppler run -- npx tsx scripts/run.ts --stage briefs --top 10
+
+      - name: Validation gate (hard fail on red)
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: doppler run -- npx tsx scripts/validate.ts
+
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ria-radar-output
+          path: |
+            output/ranked-rias.csv
+            output/ranked-rias.html
+            output/briefs/
+          retention-days: 30

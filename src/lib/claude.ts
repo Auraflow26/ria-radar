@@ -1,7 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { FirmBriefSchema, type FirmBrief } from '../types.js'
 
-export const MODEL = 'claude-opus-4-8'
+// Brief model. Default Opus 4.8 (sharpest prose, KKR demo). For bulk/scheduled
+// runs, set BRIEF_MODEL=claude-sonnet-4-6 — the task is heavily constrained
+// (forced schema + grounding gate), so Sonnet matches quality at ~1/5 the cost.
+export const MODEL = process.env.BRIEF_MODEL || 'claude-opus-4-8'
 
 const BRIEF_TOOL: Anthropic.Tool = {
   name: 'submit_brief',

@@ -20,7 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Ranked alts-readiness from public SEC Form ADV — research demo, not investment advice.
             </p>
           </div>
-          <span className="font-mono text-xs text-text-dim">app.auraflowusa.com</span>
+          <nav className="flex items-center gap-4">
+            <a href="/" className="text-xs text-text-secondary hover:text-accent-light">Ranked list</a>
+            <a href="/method" className="text-xs text-text-secondary hover:text-accent-light">Methodology</a>
+          </nav>
         </header>
         <main className="px-6 py-6 max-w-7xl mx-auto">{children}</main>
       </body>

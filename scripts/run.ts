@@ -9,13 +9,20 @@ import { setOffline } from '../src/lib/sec-client.js'
  *   npx tsx scripts/run.ts --stage briefs --top 5   # top-5 briefs only
  *   npx tsx scripts/run.ts --offline                # cache only, no network
  *   npx tsx scripts/run.ts --dry-run                # print plan, do nothing
+ *   npx tsx scripts/run.ts --with-bulk --stage ingest # +1.4GB SEC structured bulk (stale 2024-12)
  */
 
 const ALL_STAGES = ['ingest', 'score', 'enrich', 'briefs', 'validate'] as const
 type Stage = (typeof ALL_STAGES)[number]
 
 function parseArgs(argv: string[]) {
-  const args = { stages: [...ALL_STAGES] as Stage[], top: undefined as number | undefined, dryRun: false, offline: false }
+  const args = {
+    stages: [...ALL_STAGES] as Stage[],
+    top: undefined as number | undefined,
+    dryRun: false,
+    offline: false,
+    withBulk: false,
+  }
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i]
     if (a === '--stage') {
@@ -26,6 +33,7 @@ function parseArgs(argv: string[]) {
     } else if (a === '--top') args.top = Number.parseInt(argv[++i] ?? '', 10)
     else if (a === '--dry-run') args.dryRun = true
     else if (a === '--offline') args.offline = true
+    else if (a === '--with-bulk') args.withBulk = true
     else throw new Error(`unknown flag: ${a}`)
   }
   return args
@@ -33,6 +41,7 @@ function parseArgs(argv: string[]) {
 
 const args = parseArgs(process.argv)
 setOffline(args.offline)
+if (args.offline) process.env.RIA_RADAR_OFFLINE = '1'
 
 console.log(`ria-radar pipeline — stages: ${args.stages.join(' → ')}${args.offline ? ' (offline)' : ''}`)
 
@@ -42,7 +51,7 @@ if (args.dryRun) {
 }
 
 for (const stage of args.stages) {
-  if (stage === 'ingest') await (await import('./stage1-ingest.js')).runIngest()
+  if (stage === 'ingest') await (await import('./stage1-ingest.js')).runIngest({ withBulk: args.withBulk })
   else if (stage === 'score') await (await import('./stage2-score.js')).runScore()
   else if (stage === 'enrich') await (await import('./stage3-enrich.js')).runEnrich(args.top)
   else if (stage === 'briefs') await (await import('./stage4-briefs.js')).runBriefs(args.top)

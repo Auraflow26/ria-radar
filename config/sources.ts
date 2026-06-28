@@ -33,3 +33,13 @@ export const advPdfUrl = (crd: number) =>
 
 /** SEC fair-access guidance: stay well under 10 req/s. */
 export const SEC_REQUESTS_PER_SECOND = 2
+
+/**
+ * Structured Form ADV filing data (Part 1A incl. Schedule D). STALE: thru
+ * 2024-12. ~700MB/part. Hand-checked URLs, confirmed live 2026-06-26.
+ * Inner schema must be confirmed after download (central dir at file end).
+ */
+export const ADV_BULK_PARTS: { label: string; url: string }[] = [
+  { label: 'adv-filing-part1', url: 'https://www.sec.gov/files/adv-filing-data-20111105-20241231-part1.zip' },
+  { label: 'adv-filing-part2', url: 'https://www.sec.gov/files/adv-filing-data-20111105-20241231-part2.zip' },
+]

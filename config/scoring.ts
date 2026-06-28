@@ -19,7 +19,7 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'alts_exposure',
     label: 'Existing private-fund / alts exposure',
-    weight: 25,
+    weight: 28,
     source: 'Form ADV Item 7.B + private fund type counts (bulk roster)',
     rationale:
       'Firms already running private vehicles have done the operational and diligence work — shortest path to a first allocation.',
@@ -35,7 +35,7 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'aum_band',
     label: 'AUM scale',
-    weight: 15,
+    weight: 25,
     source: 'Item 5.F(2)(c) total regulatory AUM',
     rationale:
       'Distribution targets scale with shelf space — a $20B aggregator rolling out a model allocation moves more than a hundred small firms.',
@@ -43,7 +43,7 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'discretionary',
     label: 'Discretionary ratio',
-    weight: 10,
+    weight: 4,
     source: 'Item 5.F(2)(a) ÷ 5.F(2)(c)',
     rationale:
       'A discretionary book means the advisor can implement a model allocation across hundreds of households at once.',
@@ -51,7 +51,7 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'custodian',
     label: 'Custodian platform access',
-    weight: 10,
+    weight: 9,
     source: 'Schedule D 5.K(3) custodian names (per-firm ADV PDF)',
     rationale:
       'Custody at the major platforms means the operational rails for alt-product distribution already exist.',
@@ -59,7 +59,7 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'aum_growth',
     label: 'AUM growth',
-    weight: 5,
+    weight: 2,
     source: 'Total RAUM, current vs prior monthly snapshot (CRD join)',
     rationale:
       'Growing firms are adding advisors and products; growth correlates with openness to new shelf space.',
@@ -67,16 +67,20 @@ export const SIGNALS: SignalDef[] = [
   {
     key: 'web_language',
     label: 'Website alts language',
-    weight: 5,
+    weight: 2,
     source: 'Firm homepage keyword scan',
     rationale:
       'They already market private-markets capability — a warm conversation, not an education call.',
   },
 ]
 
-/** Loose ingest filter (scoring bands are narrower than this). */
+/**
+ * Mega-cap ingest filter. Wholesalers covering the alts channel target scale —
+ * a firm under $1B RAUM rarely justifies a coverage seat — so the floor drops
+ * the long tail at ingest. Scoring bands are narrower still.
+ */
 export const INGEST_FILTER = {
-  minRaum: 500_000_000,
+  minRaum: 1_000_000_000,
   maxRaum: 50_000_000_000,
 }
 

@@ -87,6 +87,17 @@ Everything downloads to `data/` on first run (~10MB of zips); after that the who
 
 All requests carry a descriptive User-Agent and run at 2 req/s per SEC fair-access guidance. Everything here is public data; AUM is self-reported regulatory AUM. This is a research demo, **not investment advice**, and it makes no claims about any manager's products, platform approvals, or internal data.
 
+## KKR RIA Project — platform extensions
+
+Tagged `[KKR-RIA]` in code. These layers make the demo a repeatable, persisted run using AuraFlow's data/agentic/schema techniques. All are **opt-in via env** — unset, the pipeline runs exactly as the file-only demo above.
+
+- **Supabase persistence** (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`). Ranked firms → `kkr_ria_firms`, briefs → `kkr_ria_briefs`. JSONB for the explainable component breakdown, natural-key (CRD) upsert, RLS on (authenticated read, service-role write). Migration: [`migrations/0001_kkr_ria_tables.sql`](migrations/0001_kkr_ria_tables.sql). Zero new dependency — talks to PostgREST via `fetch`.
+- **Agentic enrichment** (`KKR_AGENTIC_ENRICH=1`). Per firm, an Opus tool-use agent (forced `tool_choice` + strict schema, same discipline as the brief writer) decides *which* enrichment actions to run — it chooses actions only, never produces firm data. Deterministic fetchers still do the work and the grounding gate still validates every number. Off → the original fixed fetch path.
+- **Model**: KKR-facing briefs run on `claude-opus-4-8` (most capable), inside the unchanged forced-schema + grounding guardrails.
+- **Apify JS-render fallback** + **Schedule D 7.B fund detail** + **`--with-bulk` breadth** — fresher, deeper, grounded signals (see `.env.example`).
+
+The credibility moat is unchanged: the LLM is the least-trusted component. It chooses actions and writes prose; the math, the schema, and the grounding gate do everything that matters.
+
 ## What production would look like
 
 This is a two-day demo. The production version adds: full Schedule D ingestion (every private fund, every custodian, structured), quarterly time series instead of month-over-month snapshots, CRM sync so coverage teams consume ranks where they work, branch-office geo-matching to wholesaler territories, and a feedback loop where call outcomes re-weight the scoring model.

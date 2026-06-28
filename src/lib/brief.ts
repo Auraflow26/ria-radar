@@ -58,10 +58,24 @@ export function buildFirmContext(s: ScoredFirm, rank: number, screened: number):
     } else {
       lines.push('- Custodians: none extracted')
     }
+    if (e.fundDetail) {
+      const fd = e.fundDetail
+      const parts: string[] = []
+      if (fd.peFunds) parts.push(`${fd.peFunds} private equity`)
+      if (fd.privateCreditFunds) parts.push(`${fd.privateCreditFunds} private credit`)
+      if (fd.realEstateFunds) parts.push(`${fd.realEstateFunds} real estate`)
+      if (fd.hedgeFunds) parts.push(`${fd.hedgeFunds} hedge`)
+      const src = e.custodianSource === 'bulk-2024-12' ? ' (SEC structured data as of 2024-12, may not reflect latest filing)' : ' (latest ADV filing, Schedule D 7.B)'
+      if (parts.length) lines.push(`- Private-fund footprint${src}: ${parts.join(', ')}`)
+      if (fd.totalPrivateFundGrossAssets)
+        lines.push(`- Private-fund gross assets${src}: ${fmtMoney(fd.totalPrivateFundGrossAssets)}`)
+    }
     if (e.structureHits.length) lines.push(`- Website mentions vehicle structures: ${e.structureHits.join(', ')}`)
     if (e.competitorHits.length)
       lines.push(`- Website mentions competing alts managers (existing shelf relationships): ${e.competitorHits.join(', ')}`)
     if (e.websiteFetchedAt) lines.push(`- Homepage fetched: ${e.websiteFetchedAt}`)
+    if (e.custodianSource === 'bulk-2024-12')
+      lines.push('- CAVEAT: fund/custodian detail from SEC structured data as of 2024-12; may not reflect latest filing.')
   }
 
   return lines.join('\n')

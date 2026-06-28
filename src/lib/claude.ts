@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { FirmBriefSchema, type FirmBrief } from '../types.js'
 
-const MODEL = 'claude-sonnet-4-6'
+export const MODEL = 'claude-opus-4-8'
 
 const BRIEF_TOOL: Anthropic.Tool = {
   name: 'submit_brief',
@@ -58,7 +58,36 @@ HARD RULES:
 2. Do NOT compute new numbers — no averages, per-client figures, ratios, or differences that are not already written in the data. If you want to convey scale, quote the figures as given.
 3. Do NOT invent product names, platform approval statuses, clearing arrangements, or any firm-internal information.
 4. Write like a sharp salesperson briefing a colleague — concrete, direct, no filler.
-5. If a data point is missing, work around it; never guess a value.`
+5. If a data point is missing, work around it; never guess a value.
+6. A score written as "X/100" is a 0–100 RATING, NOT a percentage. Never restate a score as "X%" (e.g. a "100/100 HNW mix" score does NOT mean "100% HNW"). For an actual share, only use a percentage that appears verbatim in the data.`
+
+/** Rule 3 variant when KKR_NAMING=local: naming a STRUCTURE-fit vehicle is allowed, approval claims still forbidden. */
+const PROMPT_RULES_KKR_LOCAL = PROMPT_RULES.replace(
+  '3. Do NOT invent product names, platform approval statuses, clearing arrangements, or any firm-internal information.',
+  '3. Do NOT invent platform approval statuses, clearing arrangements, or any firm-internal information. You MAY name a specific KKR vehicle per the KKR PRODUCT NAMING block below, but ONLY as a structure fit — never as an approval or existing relationship.',
+)
+
+/**
+ * Resolve the prompt rules. With KKR_NAMING=local, dynamically loads the
+ * gitignored config/kkr-products.local.ts and appends its naming fragment.
+ * Cached after first load. Any failure falls back to the generic rules.
+ */
+let promptRulesCache: string | null = null
+async function resolvePromptRules(): Promise<string> {
+  if (promptRulesCache) return promptRulesCache
+  if (process.env.KKR_NAMING === 'local') {
+    try {
+      const mod = await import('../../config/kkr-products.local.js')
+      promptRulesCache = `${PROMPT_RULES_KKR_LOCAL}\n${mod.KKR_NAMING_PROMPT}`
+      console.log('  ⚙ KKR_NAMING=local — product naming override active (local-only)')
+      return promptRulesCache
+    } catch (err) {
+      console.warn(`  ⚠ KKR_NAMING=local set but local config not loaded (${(err as Error).message}) — using generic rules`)
+    }
+  }
+  promptRulesCache = PROMPT_RULES
+  return promptRulesCache
+}
 
 let client: Anthropic | null = null
 
@@ -73,12 +102,13 @@ export function hasApiKey(): boolean {
 export async function generateBrief(firmContext: string): Promise<FirmBrief | null> {
   try {
     client ??= new Anthropic()
+    const promptRules = await resolvePromptRules()
     const msg = await client.messages.create({
       model: MODEL,
       max_tokens: 4096,
       tools: [BRIEF_TOOL],
       tool_choice: { type: 'tool', name: 'submit_brief' },
-      messages: [{ role: 'user', content: `${PROMPT_RULES}\n\n=== FIRM DATA ===\n${firmContext}` }],
+      messages: [{ role: 'user', content: `${promptRules}\n\n=== FIRM DATA ===\n${firmContext}` }],
     })
     const toolUse = msg.content.find(
       (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === 'submit_brief',

@@ -111,3 +111,5 @@ export const AUM_BAND = {
 
 export const BRIEF_TOP_N_DEFAULT = 10
 export const ENRICH_TOP_N_DEFAULT = 75
+/** How many ranked firms to publish (DB + CSV). Cheap — no LLM/fetch, just rows. */
+export const LIST_TOP_N = 500

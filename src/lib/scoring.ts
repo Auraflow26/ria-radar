@@ -38,11 +38,29 @@ export function disqualify(firm: AdvFirm): string | null {
   return null
 }
 
+/** Per-firm logged call outcomes (counts), feeding the feedback signal. */
+export interface OutcomeTally {
+  meeting: number
+  won: number
+  no_answer: number
+  lost: number
+  not_a_fit: number
+}
+
+// Outcome → 0..1 contribution. no_answer is neutral (ignored); it carries no signal.
+const OUTCOME_VALUE: Record<keyof OutcomeTally, number | null> = {
+  won: 1.0,
+  meeting: 0.8,
+  lost: 0.3,
+  not_a_fit: 0.0,
+  no_answer: null,
+}
+
 export function computeScore(
   firm: AdvFirm,
-  opts: { priorRaum?: number | null; enrichment?: Enrichment } = {},
+  opts: { priorRaum?: number | null; enrichment?: Enrichment; outcomes?: OutcomeTally } = {},
 ): ScoredFirm {
-  const { priorRaum, enrichment } = opts
+  const { priorRaum, enrichment, outcomes } = opts
   const components: ScoreComponent[] = []
 
   // 1. alts_exposure — 7B flag, upgraded by confirmed fund counts/types from the bulk roster
@@ -146,6 +164,30 @@ export function computeScore(
     components.push(
       scored('web_language', s, parts.length ? `Homepage — ${parts.join(' · ')}` : 'No retail-alts vocabulary on homepage'),
     )
+  }
+
+  // 8. feedback — logged call outcomes nudge the rank. Neutral (missing) until
+  // outcomes exist, so it never penalizes un-contacted firms. Averages the
+  // value of all signal-bearing outcomes (no_answer ignored).
+  if (!outcomes) {
+    components.push(missing('feedback', 'No call outcomes logged yet'))
+  } else {
+    const keys = Object.keys(OUTCOME_VALUE) as (keyof OutcomeTally)[]
+    let weightedSum = 0
+    let n = 0
+    for (const k of keys) {
+      const v = OUTCOME_VALUE[k]
+      if (v === null) continue
+      const c = outcomes[k] ?? 0
+      weightedSum += v * c
+      n += c
+    }
+    if (n === 0) {
+      components.push(missing('feedback', 'Only no-answer outcomes — no signal yet'))
+    } else {
+      const parts = keys.filter(k => (outcomes[k] ?? 0) > 0).map(k => `${outcomes[k]} ${k}`)
+      components.push(scored('feedback', clamp01(weightedSum / n), `Coverage outcomes: ${parts.join(', ')}`))
+    }
   }
 
   const available = components.filter(c => c.status === 'scored')

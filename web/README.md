@@ -16,9 +16,11 @@ npm run dev                  # http://localhost:3000
 
 ## Deploy (Vercel)
 
-- Root directory: `web`
-- Env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- Framework preset: Next.js (zero config)
+- **Root directory:** `web` (set in Vercel project settings — the repo root is the pipeline, not the app)
+- **Env vars:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (publishable key — safe in browser)
+- **Framework preset:** Next.js (zero config; `vercel.json` pins it)
+- **Before sharing externally:** turn on **Deployment Protection → Password Protection** (Vercel project → Settings → Deployment Protection). The link reads live prod data, so gate it before forwarding.
+- The publishable key is anon-scoped (RLS = read-only on `kkr_ria_*`); rotating the Supabase service-role key does NOT change it.
 
 ## Data & access
 

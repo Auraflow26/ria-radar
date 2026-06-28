@@ -2,10 +2,29 @@
 // Auraflow technique: the DB stores the same structured objects the app reads,
 // JSONB for the explainable breakdown, natural-key (CRD) upsert for idempotency.
 
-import { hasSupabase, upsert } from './supabase-client.js'
+import { hasSupabase, upsert, selectAll } from './supabase-client.js'
 import type { FirmBrief, ScoredFirm } from '../types.js'
+import type { OutcomeTally } from './scoring.js'
 
 export { hasSupabase }
+
+const EMPTY_TALLY = (): OutcomeTally => ({ meeting: 0, won: 0, no_answer: 0, lost: 0, not_a_fit: 0 })
+
+/**
+ * Pull logged call outcomes and tally them per firm (CRD → counts). Returns an
+ * empty map when Supabase is unconfigured — the feedback signal then stays
+ * neutral for every firm. Read-only; safe in any run.
+ */
+export async function fetchOutcomeTallies(): Promise<Record<number, OutcomeTally>> {
+  if (!hasSupabase()) return {}
+  const rows = await selectAll<{ crd: number; outcome: keyof OutcomeTally }>('kkr_ria_outcomes', 'crd,outcome')
+  const map: Record<number, OutcomeTally> = {}
+  for (const r of rows) {
+    const t = (map[r.crd] ??= EMPTY_TALLY())
+    if (r.outcome in t) t[r.outcome]++
+  }
+  return map
+}
 
 /** Upsert the ranked firm list. No-op when Supabase is unconfigured. */
 export async function persistRankedFirms(ranked: ScoredFirm[], snapshot: string): Promise<number> {

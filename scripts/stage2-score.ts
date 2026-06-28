@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { computeScore, partitionFirms } from '../src/lib/scoring.js'
 import { writeRankedCsv, writeRankedHtml } from '../src/lib/report.js'
-import { persistRankedFirms, hasSupabase } from '../src/lib/persist.js'
+import { persistRankedFirms, hasSupabase, fetchOutcomeTallies } from '../src/lib/persist.js'
 import type { AdvFirm, Enrichment, ScoredFirm } from '../src/types.js'
 
 export async function runScore(): Promise<void> {
@@ -19,8 +19,13 @@ export async function runScore(): Promise<void> {
   const { inScope, excluded } = partitionFirms(firms)
   console.log(`  ${inScope.length.toLocaleString()} in scope · ${excluded.length.toLocaleString()} excluded (see output/excluded.csv)`)
 
+  // feedback loop: tally logged call outcomes (empty when Supabase unconfigured → neutral)
+  const outcomes = await fetchOutcomeTallies()
+  const nFb = Object.keys(outcomes).length
+  if (nFb) console.log(`  feedback: ${nFb} firm(s) have logged outcomes nudging the score`)
+
   const scored: ScoredFirm[] = inScope
-    .map(f => computeScore(f, { priorRaum: priorByCrd.get(f.crd), enrichment: enrichments[f.crd] }))
+    .map(f => computeScore(f, { priorRaum: priorByCrd.get(f.crd), enrichment: enrichments[f.crd], outcomes: outcomes[f.crd] }))
     .sort((a, b) => b.total - a.total)
 
   writeFileSync('data/scored.json', JSON.stringify(scored))

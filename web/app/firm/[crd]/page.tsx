@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabase, type Firm, type Brief, fmtMoney } from '@/lib/supabase'
 import { OutcomeLogger } from '@/components/OutcomeLogger'
+import { SourceContext } from '@/components/SourceContext'
 
 export const revalidate = 300
 
@@ -88,6 +89,7 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
           <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
             {b.brief.conversation_starters.map((x, i) => <li key={i}>{x}</li>)}
           </ul>
+          <SourceContext context={b.source_context} />
         </section>
       ) : (
         <p className="mt-7 text-sm text-text-muted">No brief generated for this firm (outside top-N).</p>

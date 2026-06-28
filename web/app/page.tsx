@@ -8,7 +8,7 @@ export default async function HomePage() {
     .from('kkr_ria_firms')
     .select('*')
     .order('rank', { ascending: true })
-    .limit(200)
+    .limit(500)
 
   if (error) {
     return <p className="text-danger font-mono text-sm">Failed to load firms: {error.message}</p>

@@ -23,10 +23,31 @@ function missing(key: string, evidence: string): ScoreComponent {
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x))
 
+/** Normalize messy ADV names: collapse "X; X ADVISORY SOLUTIONS" style
+ *  duplicate-prefix entries to the longer single name, tidy whitespace. */
+export function normalizeName(raw: string): string {
+  const parts = raw.split(';').map(s => s.trim()).filter(Boolean)
+  if (parts.length > 1) {
+    // if one part is a prefix of another (case-insensitive), keep the longest
+    const longest = parts.reduce((a, b) => (b.length > a.length ? b : a))
+    if (parts.every(p => longest.toUpperCase().startsWith(p.toUpperCase().slice(0, Math.min(p.length, 8))))) {
+      return longest.replace(/\s+/g, ' ')
+    }
+    return parts.join(' / ').replace(/\s+/g, ' ')
+  }
+  return raw.replace(/\s+/g, ' ').trim()
+}
+
+// Entities that are NOT a wholesaler's RIA distribution target: product
+// manufacturers' research/wealth arms and roll-up aggregators (they don't make
+// the per-firm allocation decision a wholesaler is calling about).
+const NON_DISTRIBUTOR_NAME = /\b(investment institute|asset management(?:\s+(?:lp|inc|llc))?$|aggregator|focus financial|wells fargo|merrill|morgan stanley|goldman sachs|jpmorgan|j\.?p\.? morgan|fidelity investments|vanguard|blackrock|calamos)\b/i
+
 /** Hard disqualifiers. Returns a reason, or null if the firm is in scope. */
 export function disqualify(firm: AdvFirm): string | null {
   if (firm.secStatus && !/approved/i.test(firm.secStatus)) return `SEC status: ${firm.secStatus}`
   if (firm.country && !/united states/i.test(firm.country)) return `non-US main office: ${firm.country}`
+  if (NON_DISTRIBUTOR_NAME.test(firm.name)) return `not a distribution target (manufacturer/aggregator/research arm): ${firm.name}`
   if (
     firm.raumPooled !== null &&
     firm.raumTotal !== null &&
@@ -196,7 +217,7 @@ export function computeScore(
   const total = availableWeight > 0 ? (available.reduce((a, c) => a + (c.score ?? 0) * c.weight, 0) / availableWeight) * 100 : 0
 
   return {
-    firm,
+    firm: { ...firm, name: normalizeName(firm.name) },
     total: Math.round(total * 10) / 10,
     components,
     dataCompleteness: Math.round((availableWeight / totalWeight) * 100) / 100,

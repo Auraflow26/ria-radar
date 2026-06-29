@@ -1,5 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { ChatWidget } from '@/components/ChatWidget'
+import { Onboarding } from '@/components/Onboarding'
 
 export const metadata: Metadata = {
   title: 'RIA Radar — KKR RIA Project',
@@ -28,6 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main className="px-6 py-6 max-w-7xl mx-auto">{children}</main>
+        <ChatWidget />
+        <Onboarding />
       </body>
     </html>
   )

@@ -27,7 +27,8 @@ export async function runScore(): Promise<void> {
 
   const scored: ScoredFirm[] = inScope
     .map(f => computeScore(f, { priorRaum: priorByCrd.get(f.crd), enrichment: enrichments[f.crd], outcomes: outcomes[f.crd] }))
-    .sort((a, b) => b.total - a.total)
+    // deterministic order: score, then RAUM, then CRD — stable across re-runs, no arbitrary ties
+    .sort((a, b) => b.total - a.total || (b.firm.raumTotal ?? 0) - (a.firm.raumTotal ?? 0) || a.firm.crd - b.firm.crd)
 
   writeFileSync('data/scored.json', JSON.stringify(scored))
   writeRankedCsv(scored.slice(0, LIST_TOP_N), excluded)

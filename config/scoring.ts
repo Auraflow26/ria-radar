@@ -111,5 +111,7 @@ export const AUM_BAND = {
 
 export const BRIEF_TOP_N_DEFAULT = 10
 export const ENRICH_TOP_N_DEFAULT = 75
-/** How many ranked firms to publish (DB + CSV). Cheap — no LLM/fetch, just rows. */
-export const LIST_TOP_N = 500
+/** How many ranked firms to publish. Capped to the differentiated set — the
+ *  deep tail is unenriched (tied scores, no custodian/fund data) and weakens
+ *  the precision story. 150 keeps it credible. */
+export const LIST_TOP_N = 150

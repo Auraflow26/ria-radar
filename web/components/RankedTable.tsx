@@ -90,7 +90,33 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
         <span className="font-mono text-xs text-text-muted self-center ml-auto">{rows.length} shown</span>
       </div>
 
-      <div className="overflow-x-auto rounded-card border border-[rgba(139,92,246,0.12)]">
+      {/* mobile: card list (below sm) */}
+      <div className="sm:hidden space-y-2">
+        {rows.map(({ f, ls, lensRank }) => (
+          <Link
+            key={f.crd}
+            href={`/firm/${f.crd}`}
+            className="block bg-bg-card border border-[rgba(139,92,246,0.12)] rounded-card p-3 hover:bg-bg-elevated transition-colors"
+          >
+            <div className="flex items-baseline justify-between">
+              <span className="text-text-primary font-medium text-sm">{f.name}</span>
+              <span className="font-mono font-semibold text-accent-bright text-sm">{Math.round(ls)}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1 text-xs text-text-muted">
+              <span className="font-mono text-text-dim">#{lensRank}</span>
+              <span>{[f.city, f.state].filter(Boolean).join(', ')}</span>
+            </div>
+            <div className="flex items-center gap-3 mt-1.5 text-xs">
+              <span className="font-mono text-text-secondary">{fmtMoney(f.raum_total)}</span>
+              <span className="text-text-muted">{custodianOf(f) || '—'}</span>
+              <span className="font-mono text-text-secondary">{f.private_fund_count ?? '—'} funds</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* desktop: table (sm and up) */}
+      <div className="hidden sm:block overflow-x-auto rounded-card border border-[rgba(139,92,246,0.12)]">
         <table className="w-full text-sm">
           <thead className="bg-bg-secondary text-text-muted">
             <tr className="text-left">

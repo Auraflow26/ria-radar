@@ -1,5 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { ChatWidget } from '@/components/ChatWidget'
+import { Onboarding } from '@/components/Onboarding'
 
 export const metadata: Metadata = {
   title: 'RIA Radar — KKR RIA Project',
@@ -22,11 +24,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <nav className="flex items-center gap-4">
             <a href="/" className="text-xs text-text-secondary hover:text-accent-light">Ranked list</a>
+            <a href="/ask" className="text-xs text-text-secondary hover:text-accent-light">Ask the data</a>
             <a href="/memo" className="text-xs text-text-secondary hover:text-accent-light">How I&apos;d work it</a>
             <a href="/method" className="text-xs text-text-secondary hover:text-accent-light">Methodology</a>
           </nav>
         </header>
         <main className="px-6 py-6 max-w-7xl mx-auto">{children}</main>
+        <ChatWidget />
+        <Onboarding />
       </body>
     </html>
   )

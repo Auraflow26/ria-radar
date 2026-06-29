@@ -2,14 +2,28 @@
 
 import { useState } from 'react'
 
-interface Turn { q: string; a: string }
+interface Turn { q: string; a: string; action?: Record<string, string> | null }
 
 const SUGGESTIONS = [
-  'How does the score work?',
-  'What do the desk lenses do?',
+  'Show me NY firms over $10B',
   'Which firms have the most private funds?',
-  'How should I use this tool?',
+  'How does the score work?',
+  'Rank for the credit desk',
 ]
+
+function actionUrl(a: Record<string, string>): string {
+  const p = new URLSearchParams(a)
+  return `/?${p.toString()}`
+}
+function actionLabel(a: Record<string, string>): string {
+  const bits: string[] = []
+  if (a.lens) bits.push(`${a.lens} lens`)
+  if (a.state) bits.push(a.state)
+  if (a.minAum) bits.push(`≥ $${a.minAum}B`)
+  if (a.minFunds) bits.push(`≥ ${a.minFunds} funds`)
+  if (a.q) bits.push(`"${a.q}"`)
+  return `Show on the list — ${bits.join(' · ')} →`
+}
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false)
@@ -29,7 +43,7 @@ export function ChatWidget() {
       })
       const data = await res.json()
       if (!res.ok) setErr(data.error ?? 'Unavailable.')
-      else setTurns(t => [...t, { q: question, a: data.answer }])
+      else setTurns(t => [...t, { q: question, a: data.answer, action: data.action }])
     } catch { setErr('Network error.') }
     setBusy(false)
   }
@@ -38,6 +52,8 @@ export function ChatWidget() {
     <>
       {/* launcher */}
       <button
+        type="button"
+        data-tour="guide"
         onClick={() => setOpen(o => !o)}
         className="fixed bottom-5 right-5 z-50 bg-accent text-white rounded-pill px-4 py-3 text-sm font-medium shadow-lg hover:bg-accent-light transition-colors"
         aria-label="Open Research Guide"
@@ -67,6 +83,14 @@ export function ChatWidget() {
               <div key={i}>
                 <p className="text-xs text-accent-light font-medium">{t.q}</p>
                 <p className="text-xs text-text-secondary mt-1 whitespace-pre-wrap">{t.a}</p>
+                {t.action && (
+                  <a
+                    href={actionUrl(t.action)}
+                    className="inline-block mt-1.5 text-[11px] bg-accent text-white rounded-pill px-3 py-1 hover:bg-accent-light transition-colors"
+                  >
+                    {actionLabel(t.action)}
+                  </a>
+                )}
               </div>
             ))}
             {busy && <p className="text-xs text-text-muted">Thinking…</p>}

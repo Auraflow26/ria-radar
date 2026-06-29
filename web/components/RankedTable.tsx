@@ -46,6 +46,7 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
   const [q, setQ] = useState('')
   const [state, setState] = useState('')
   const [minAum, setMinAum] = useState(0)
+  const [minFunds, setMinFunds] = useState(0)
   const [lensId, setLensId] = useState('balanced')
   const [hideCalled, setHideCalled] = useState(false)
   const [queue, setStatus] = useQueue()
@@ -53,7 +54,8 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
     Object.fromEntries(LENSES[0].weights ? Object.entries(LENSES[0].weights) : []),
   )
 
-  // On load, hydrate a shared custom lens from the URL (?w=key:val,key:val)
+  // On load, hydrate from the URL: shared custom lens (?w=) and chat-driven
+  // filters (?state=, ?minAum=, ?minFunds=, ?q=, ?lens=).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const w = params.get('w')
@@ -65,6 +67,12 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
       }
       if (Object.keys(parsed).length) { setCustom(parsed); setLensId('custom') }
     }
+    const lensParam = params.get('lens')
+    if (lensParam && LENSES.some(l => l.id === lensParam)) setLensId(lensParam)
+    const st = params.get('state'); if (st) setState(st.toUpperCase())
+    const ma = params.get('minAum'); if (ma && !Number.isNaN(Number(ma))) setMinAum(Number(ma))
+    const mf = params.get('minFunds'); if (mf && !Number.isNaN(Number(mf))) setMinFunds(Number(mf))
+    const qp = params.get('q'); if (qp) setQ(qp)
   }, [])
 
   const states = useMemo(() => US_STATES(firms), [firms])
@@ -87,18 +95,19 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
       if (needle && !`${f.name} ${custodianOf(f)} ${f.city ?? ''}`.toLowerCase().includes(needle)) return false
       if (state && f.state !== state) return false
       if (minAum && (f.raum_total ?? 0) < minAum * 1e9) return false
+      if (minFunds && (f.private_fund_count ?? 0) < minFunds) return false
       if (hideCalled && queue[f.crd] === 'called') return false
       return true
     })
     // priority firms float to top; called/skip sink — without changing the rank number
     const w = (crd: number) => (queue[crd] === 'priority' ? 0 : queue[crd] === 'called' || queue[crd] === 'skip' ? 2 : 1)
     return filtered.sort((a, b) => w(a.f.crd) - w(b.f.crd))
-  }, [ranked, q, state, minAum, hideCalled, queue])
+  }, [ranked, q, state, minAum, minFunds, hideCalled, queue])
 
   return (
     <div>
       {/* Desk lens — the analyst's thesis made visible */}
-      <div className="mb-4 bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-card p-3">
+      <div data-tour="lenses" className="mb-4 bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-card p-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs uppercase tracking-wide text-accent font-semibold">Rank for</span>
           {LENSES.map(l => (
@@ -160,7 +169,7 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div data-tour="filters" className="flex flex-wrap gap-3 mb-4">
         <input
           value={q}
           onChange={e => setQ(e.target.value)}
@@ -238,13 +247,13 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
           <thead className="bg-bg-secondary text-text-muted">
             <tr className="text-left">
               <th className="px-3 py-2 font-mono font-medium">#</th>
-              <th className="px-3 py-2 font-mono font-medium">Score</th>
+              <th data-tour="score" className="px-3 py-2 font-mono font-medium">Score</th>
               <th className="px-3 py-2 font-medium">Firm</th>
               <th className="px-3 py-2 font-medium">Location</th>
               <th className="px-3 py-2 font-mono font-medium text-right">RAUM</th>
               <th className="px-3 py-2 font-medium">Custodian</th>
               <th className="px-3 py-2 font-mono font-medium text-right">Funds</th>
-              <th className="px-3 py-2 font-medium">Queue</th>
+              <th data-tour="queue" className="px-3 py-2 font-medium">Queue</th>
             </tr>
           </thead>
           <tbody>

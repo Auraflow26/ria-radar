@@ -27,7 +27,11 @@ HARD RULES:
 2. If a data answer isn't in the dataset, say "That's not in the current dataset."
 3. For HOW-IT-WORKS questions, explain from the description above. You may help users navigate ("use the Private credit desk lens at the top", "open the firm's page for its brief").
 4. Be concise and concrete, like an analyst helping a colleague. Short lists, point to the right page.
-5. Public SEC data, research demo — not investment advice.`
+5. Public SEC data, research demo — not investment advice.
+
+ACTIONS: when the user asks to FILTER or SHOW a subset of the list (by state, AUM, fund count, custodian keyword, or desk lens), end your reply with ONE directive line in this exact form so the app can apply it:
+[[APPLY state=TX minAum=10 minFunds=5 q=schwab lens=credit]]
+Include only the keys that apply. state = 2-letter code. minAum in $B (integer). minFunds = integer. q = a single search keyword. lens = one of balanced|credit|pe|realestate. Put the directive on its own final line; still give a short text answer above it. Omit the directive entirely for pure questions.`
 
 interface FirmRow {
   rank: number; name: string; city: string | null; state: string | null
@@ -74,8 +78,23 @@ export async function POST(req: Request) {
       system: SYSTEM,
       messages: [{ role: 'user', content: `=== FIRM DATA (${firms.length} firms) ===\n${context}\n\n=== QUESTION ===\n${question}` }],
     })
-    const text = msg.content.find(b => b.type === 'text')
-    return Response.json({ answer: text && text.type === 'text' ? text.text : 'No answer.' })
+    const block = msg.content.find(b => b.type === 'text')
+    let answer = block && block.type === 'text' ? block.text : 'No answer.'
+
+    // Parse an optional [[APPLY ...]] directive into a filter action + strip it from the text.
+    let action: Record<string, string> | null = null
+    const m = answer.match(/\[\[APPLY([^\]]*)\]\]/i)
+    if (m) {
+      answer = answer.replace(m[0], '').trim()
+      const allowed = new Set(['state', 'minAum', 'minFunds', 'q', 'lens'])
+      const params: Record<string, string> = {}
+      for (const kv of m[1].trim().split(/\s+/)) {
+        const [k, v] = kv.split('=')
+        if (k && v && allowed.has(k)) params[k] = v
+      }
+      if (Object.keys(params).length) action = params
+    }
+    return Response.json({ answer, action })
   } catch (e) {
     // Don't leak raw provider errors (billing, etc.) to the UI.
     const raw = (e as Error).message

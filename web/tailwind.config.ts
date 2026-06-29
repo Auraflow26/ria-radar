@@ -1,32 +1,33 @@
 import type { Config } from 'tailwindcss'
 
-// AuraFlow brand kit — dark theme, purple accent, mono for data.
+// KKR brand kit — navy + bright blue, gold accent, clean sans. Token names kept
+// from the prior theme so the remap propagates without touching every component.
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        bg: '#030305',
-        'bg-secondary': '#0a0a0f',
-        'bg-card': '#0c0a12',
-        'bg-elevated': '#141220',
-        accent: '#8b5cf6',
-        'accent-light': '#a78bfa',
-        'accent-bright': '#c4b5fd',
-        gold: '#d4af37',
+        bg: '#001026', // deep navy base
+        'bg-secondary': '#001A3A', // KKR primary navy
+        'bg-card': '#04203f', // navy card
+        'bg-elevated': '#062a52', // raised navy
+        accent: '#00A3E0', // KKR bright blue
+        'accent-light': '#33b8e8',
+        'accent-bright': '#66caef',
+        gold: '#C8A96E', // KKR premium gold
         success: '#10b981',
         danger: '#ef4444',
         warning: '#f59e0b',
-        'text-primary': '#faf5ff',
-        'text-secondary': '#c4b5fd',
-        'text-muted': '#7c7291',
-        'text-dim': '#4a4458',
+        'text-primary': '#FFFFFF',
+        'text-secondary': '#c7d6e6', // light blue-gray
+        'text-muted': '#8aa0b8',
+        'text-dim': '#5a708a',
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
-      borderRadius: { card: '16px', input: '12px', pill: '100px' },
+      borderRadius: { card: '12px', input: '8px', pill: '100px' },
     },
   },
   plugins: [],

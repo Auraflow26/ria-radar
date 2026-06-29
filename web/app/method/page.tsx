@@ -36,7 +36,7 @@ export default function MethodPage() {
       </p>
       <div className="space-y-2">
         {SIGNALS.map(([label, w, src, why]) => (
-          <div key={label} className="bg-bg-card border border-[rgba(139,92,246,0.12)] rounded-input p-3">
+          <div key={label} className="bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-input p-3">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-medium text-text-primary">{label}</span>
               <span className="font-mono text-xs text-accent-bright">w {w}</span>
@@ -69,7 +69,7 @@ export default function MethodPage() {
         <li>This is a research demo, not investment advice.</li>
       </ul>
 
-      <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(139,92,246,0.08)] pt-3">
+      <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(0,163,224,0.08)] pt-3">
         Built as a working answer to a distribution problem — not a product pitch. Public SEC data · research demo.
       </p>
     </div>

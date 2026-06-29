@@ -38,7 +38,7 @@ export default function MemoPage() {
       </p>
 
       <h3 className="text-xs uppercase tracking-wide text-accent font-semibold mt-7 mb-2">Where I&apos;d start this week</h3>
-      <div className="overflow-x-auto rounded-card border border-[rgba(139,92,246,0.12)] mt-2">
+      <div className="overflow-x-auto rounded-card border border-[rgba(0,163,224,0.12)] mt-2">
         <table className="w-full text-sm">
           <thead className="bg-bg-secondary text-text-muted text-left">
             <tr>
@@ -49,7 +49,7 @@ export default function MemoPage() {
           </thead>
           <tbody>
             {STARTERS.map(([r, n, loc, aum, cust, pf, why]) => (
-              <tr key={r} className="border-t border-[rgba(139,92,246,0.08)]">
+              <tr key={r} className="border-t border-[rgba(0,163,224,0.08)]">
                 <td className="px-3 py-2 font-mono text-text-dim">{r}</td>
                 <td className="px-3 py-2"><span className="text-text-primary font-medium">{n}</span><br /><span className="text-[11px] text-text-muted">{loc}</span></td>
                 <td className="px-3 py-2 font-mono text-text-secondary text-right">{aum}</td>
@@ -82,7 +82,7 @@ export default function MemoPage() {
         current and honest.
       </p>
       <p className="mt-3 text-sm text-text-primary">— Mo</p>
-      <p className="mt-6 text-[11px] text-text-dim border-t border-[rgba(139,92,246,0.08)] pt-3">Public SEC data · research demo · not investment advice.</p>
+      <p className="mt-6 text-[11px] text-text-dim border-t border-[rgba(0,163,224,0.08)] pt-3">Public SEC data · research demo · not investment advice.</p>
     </div>
   )
 }

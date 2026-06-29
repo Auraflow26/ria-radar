@@ -15,7 +15,7 @@ export function SourceContext({ context }: { context: string }) {
         {open ? '▾' : '▸'} View the source data the brief is checked against
       </button>
       {open && (
-        <pre className="mt-2 bg-bg-secondary border border-[rgba(139,92,246,0.12)] rounded-input p-3 text-[11px] text-text-muted whitespace-pre-wrap font-mono overflow-x-auto">
+        <pre className="mt-2 bg-bg-secondary border border-[rgba(0,163,224,0.12)] rounded-input p-3 text-[11px] text-text-muted whitespace-pre-wrap font-mono overflow-x-auto">
           {context}
         </pre>
       )}

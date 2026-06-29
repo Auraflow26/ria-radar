@@ -33,7 +33,7 @@ export function OutcomeLogger({ crd }: { crd: number }) {
   }, [crd])
 
   return (
-    <section className="mt-8 bg-bg-card border border-[rgba(139,92,246,0.12)] rounded-card p-4">
+    <section className="mt-8 bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-card p-4">
       <div className="flex items-center gap-2 mb-1">
         <h3 className="text-xs uppercase tracking-wide text-accent font-semibold">Coverage outcomes</h3>
         <span className="font-mono text-[10px] text-text-dim">read-only demo</span>

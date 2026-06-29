@@ -1,9 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* KKR navy base, Helvetica-family sans for the clean internal-memo feel. */
 body {
-  background: #030305;
-  color: #faf5ff;
+  background: #001026;
+  color: #ffffff;
+  font-family: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
 }
+
+/* Print-to-PDF: clean white meeting-prep sheet. Hide nav/chat/queue controls;
+   show notes section. Triggered by the Export-brief button (window.print). */
+@media print {
+  body { background: #fff !important; color: #15202b !important; }
+  header, footer, .no-print { display: none !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  .print-only { display: block !important; }
+  a { color: #15202b !important; text-decoration: none; }
+  * { color: #15202b !important; border-color: #ccc !important; background: transparent !important; }
+  .print-notes { border: 1px solid #ccc; min-height: 140px; border-radius: 6px; margin-top: 12px; }
+  @page { margin: 1.4cm; }
+}
+.print-only { display: none; }
+

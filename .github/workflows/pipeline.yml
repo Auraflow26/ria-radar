@@ -58,6 +58,12 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: doppler run -- npx tsx scripts/validate.ts
 
+      - name: Watchlist — diff filings, raise ADV-change alerts, push to Slack
+        if: success()
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: doppler run -- npx tsx scripts/watch.ts
+
       - name: Upload outputs
         if: always()
         uses: actions/upload-artifact@v4

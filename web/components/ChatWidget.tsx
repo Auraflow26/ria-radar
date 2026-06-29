@@ -40,15 +40,15 @@ export function ChatWidget() {
       <button
         onClick={() => setOpen(o => !o)}
         className="fixed bottom-5 right-5 z-50 bg-accent text-white rounded-pill px-4 py-3 text-sm font-medium shadow-lg hover:bg-accent-light transition-colors"
-        aria-label="Open guide"
+        aria-label="Open KKR Research Guide"
       >
-        {open ? '✕ Close' : '💬 Ask the guide'}
+        {open ? '✕ Close' : '💬 KKR Research Guide'}
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-5 z-50 w-[min(92vw,380px)] max-h-[70vh] flex flex-col bg-bg-elevated border border-[rgba(139,92,246,0.3)] rounded-card shadow-2xl">
-          <div className="px-4 py-3 border-b border-[rgba(139,92,246,0.15)]">
-            <p className="text-sm font-semibold text-text-primary">RIA Radar guide</p>
+        <div className="fixed bottom-20 right-5 z-50 w-[min(92vw,380px)] max-h-[70vh] flex flex-col bg-bg-elevated border border-[rgba(0,163,224,0.3)] rounded-card shadow-2xl">
+          <div className="px-4 py-3 border-b border-[rgba(0,163,224,0.15)]">
+            <p className="text-sm font-semibold text-text-primary">KKR Research Guide</p>
             <p className="text-[11px] text-text-muted">Ask about the data or how the tool works — answers grounded in the dataset.</p>
           </div>
 
@@ -57,7 +57,7 @@ export function ChatWidget() {
               <div className="flex flex-wrap gap-2">
                 {SUGGESTIONS.map(s => (
                   <button key={s} onClick={() => ask(s)}
-                    className="text-[11px] text-text-secondary border border-[rgba(139,92,246,0.2)] rounded-pill px-2.5 py-1 hover:bg-bg-card transition-colors">
+                    className="text-[11px] text-text-secondary border border-[rgba(0,163,224,0.2)] rounded-pill px-2.5 py-1 hover:bg-bg-card transition-colors">
                     {s}
                   </button>
                 ))}
@@ -73,13 +73,13 @@ export function ChatWidget() {
             {err && <p className="text-xs text-danger">{err}</p>}
           </div>
 
-          <form onSubmit={e => { e.preventDefault(); ask(q) }} className="flex gap-2 p-3 border-t border-[rgba(139,92,246,0.15)]">
+          <form onSubmit={e => { e.preventDefault(); ask(q) }} className="flex gap-2 p-3 border-t border-[rgba(0,163,224,0.15)]">
             <input
               value={q}
               onChange={e => setQ(e.target.value)}
               placeholder="Ask anything…"
               maxLength={500}
-              className="flex-1 bg-bg-secondary border border-[rgba(139,92,246,0.2)] rounded-input px-3 py-2 text-xs text-text-primary placeholder:text-text-dim outline-none focus:border-[rgba(139,92,246,0.5)]"
+              className="flex-1 bg-bg-secondary border border-[rgba(0,163,224,0.2)] rounded-input px-3 py-2 text-xs text-text-primary placeholder:text-text-dim outline-none focus:border-[rgba(0,163,224,0.5)]"
             />
             <button type="submit" disabled={busy || !q.trim()}
               className="bg-accent text-white rounded-input px-3 py-2 text-xs font-medium disabled:opacity-50">

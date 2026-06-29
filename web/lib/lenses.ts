@@ -14,6 +14,18 @@ export interface Lens {
   weights: Record<string, number> // signal key → weight
 }
 
+// Signals exposed in the custom-lens slider panel (key → friendly label).
+export const SIGNAL_LABELS: { key: string; label: string }[] = [
+  { key: 'alts_exposure', label: 'Private-fund exposure' },
+  { key: 'hnw_mix', label: 'HNW client mix' },
+  { key: 'aum_band', label: 'AUM scale' },
+  { key: 'custodian', label: 'Custodian access' },
+  { key: 'discretionary', label: 'Discretionary ratio' },
+  { key: 'web_language', label: 'Website alts language' },
+  { key: 'aum_growth', label: 'AUM growth' },
+  { key: 'feedback', label: 'Coverage feedback' },
+]
+
 // Base weights mirror the committed scoring model (the "balanced" house view).
 export const LENSES: Lens[] = [
   {

@@ -59,3 +59,22 @@ export async function upsert(table: string, rows: unknown[], onConflict: string)
     throw new Error(`Supabase upsert ${table} → HTTP ${res.status}: ${detail.slice(0, 300)}`)
   }
 }
+
+/** Plain insert (no conflict target) — for append-only tables like alerts. */
+export async function insertRows(table: string, rows: unknown[]): Promise<void> {
+  if (!hasSupabase() || rows.length === 0) return
+  const res = await fetch(`${URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      apikey: SERVICE_KEY as string,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(rows),
+  })
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`Supabase insert ${table} → HTTP ${res.status}: ${detail.slice(0, 300)}`)
+  }
+}

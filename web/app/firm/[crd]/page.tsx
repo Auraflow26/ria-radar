@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { supabase, type Firm, type Brief, fmtMoney } from '@/lib/supabase'
 import { OutcomeLogger } from '@/components/OutcomeLogger'
 import { SourceContext } from '@/components/SourceContext'
+import { PrintButton } from '@/components/PrintButton'
 
 export const revalidate = 300
 
@@ -24,7 +25,10 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Link href="/" className="text-xs text-text-muted hover:text-accent-light font-mono">← ranked list</Link>
+      <div className="flex items-center justify-between">
+        <Link href="/" className="text-xs text-text-muted hover:text-accent font-mono no-print">← call queue</Link>
+        <PrintButton />
+      </div>
 
       <div className="mt-3 flex items-start justify-between">
         <div>
@@ -57,7 +61,7 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
           ['HNW share', pct(f.raum_hnw)],
           ['Private funds', String(f.private_fund_count ?? '—')],
         ].map(([l, v]) => (
-          <div key={l} className="bg-bg-card border border-[rgba(139,92,246,0.12)] rounded-card p-3 text-center">
+          <div key={l} className="bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-card p-3 text-center">
             <div className="font-mono font-semibold text-text-primary">{v}</div>
             <div className="text-[10px] uppercase tracking-wide text-text-muted mt-1">{l}</div>
           </div>
@@ -68,7 +72,7 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
       {b ? (
         <section className="mt-7">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-xs uppercase tracking-wide text-accent font-semibold">Pre-meeting brief</h3>
+            <h3 className="text-xs uppercase tracking-wide text-gold font-semibold">Pre-meeting brief</h3>
             <span className="font-mono text-[10px] text-text-dim">{b.model}</span>
             {b.grounded && <span className="font-mono text-[10px] text-success">✓ grounded</span>}
           </div>
@@ -101,9 +105,9 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
         <div className="space-y-2">
           {f.components.map(c => {
             const val = c.status === 'missing' ? null : Math.round((c.score ?? 0) * 100)
-            const tone = val === null ? 'bg-text-dim' : val >= 70 ? 'bg-success' : val >= 40 ? 'bg-warning' : 'bg-danger'
+            const tone = val === null ? 'bg-text-dim' : val >= 70 ? 'bg-accent' : val >= 40 ? 'bg-accent-light' : 'bg-[rgba(0,163,224,0.35)]'
             return (
-              <div key={c.key} className="bg-bg-card border border-[rgba(139,92,246,0.12)] rounded-input p-3">
+              <div key={c.key} className="bg-bg-card border border-[rgba(0,163,224,0.12)] rounded-input p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-text-primary">{c.label}</span>
                   <span className="font-mono text-xs text-text-secondary">{val === null ? 'no data' : `${val}/100`}</span>
@@ -118,10 +122,18 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
         </div>
       </section>
 
-      <OutcomeLogger crd={f.crd} />
+      <div className="no-print">
+        <OutcomeLogger crd={f.crd} />
+      </div>
+
+      {/* print-only meeting notes section */}
+      <div className="print-only mt-6">
+        <h3 className="text-xs uppercase tracking-wide font-semibold">My notes</h3>
+        <div className="print-notes" />
+      </div>
 
       {b && (
-        <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(139,92,246,0.08)] pt-3">
+        <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(0,163,224,0.08)] pt-3">
           Caveats: {b.brief.caveats.join(' · ')}. Scores are deterministic; the LLM writes prose, never numbers. Public SEC data — research demo, not investment advice.
         </p>
       )}

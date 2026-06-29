@@ -32,7 +32,7 @@ export function GateForm({ next }: { next: string }) {
         onChange={e => setPw(e.target.value)}
         placeholder="Access password"
         autoFocus
-        className="w-full bg-bg-secondary border border-[rgba(139,92,246,0.2)] rounded-input px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:border-[rgba(139,92,246,0.5)] outline-none"
+        className="w-full bg-bg-secondary border border-[rgba(0,163,224,0.2)] rounded-input px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:border-[rgba(0,163,224,0.5)] outline-none"
       />
       <button
         type="submit"

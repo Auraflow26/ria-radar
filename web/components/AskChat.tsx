@@ -44,7 +44,7 @@ export function AskChat({ suggestions }: { suggestions: string[] }) {
           onChange={e => setQ(e.target.value)}
           placeholder="Ask about the firm list…"
           maxLength={500}
-          className="flex-1 bg-bg-card border border-[rgba(139,92,246,0.2)] rounded-input px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:border-[rgba(139,92,246,0.5)] outline-none"
+          className="flex-1 bg-bg-card border border-[rgba(0,163,224,0.2)] rounded-input px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:border-[rgba(0,163,224,0.5)] outline-none"
         />
         <button
           type="submit"
@@ -61,7 +61,7 @@ export function AskChat({ suggestions }: { suggestions: string[] }) {
             <button
               key={s}
               onClick={() => ask(s)}
-              className="text-xs text-text-secondary border border-[rgba(139,92,246,0.2)] rounded-pill px-3 py-1.5 hover:bg-bg-elevated transition-colors"
+              className="text-xs text-text-secondary border border-[rgba(0,163,224,0.2)] rounded-pill px-3 py-1.5 hover:bg-bg-elevated transition-colors"
             >
               {s}
             </button>
@@ -81,7 +81,7 @@ export function AskChat({ suggestions }: { suggestions: string[] }) {
         {busy && <p className="text-sm text-text-muted">Thinking…</p>}
       </div>
 
-      <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(139,92,246,0.08)] pt-3">
+      <p className="mt-8 text-[11px] text-text-dim border-t border-[rgba(0,163,224,0.08)] pt-3">
         Answers are grounded in the 150-firm dataset only · public SEC data · research demo · not investment advice.
       </p>
     </div>

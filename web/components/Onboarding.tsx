@@ -18,7 +18,7 @@ export function Onboarding() {
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={dismiss}>
-      <div className="w-full max-w-md bg-bg-elevated border border-[rgba(139,92,246,0.3)] rounded-card p-6" onClick={e => e.stopPropagation()}>
+      <div className="w-full max-w-md bg-bg-elevated border border-[rgba(0,163,224,0.3)] rounded-card p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-text-primary">Welcome to RIA Radar</h2>
         <p className="text-sm text-text-secondary mt-2">
           Every US wealth-channel RIA, scored on alternatives-readiness from public SEC filings. Not a list to buy —

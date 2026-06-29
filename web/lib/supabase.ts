@@ -68,5 +68,13 @@ export interface Brief {
   source_context: string
 }
 
+export interface Alert {
+  crd: number
+  name: string
+  kind: 'raum_jump' | 'new_fund' | 'custodian_change' | 'new_filing'
+  detail: string
+  created_at: string
+}
+
 export const fmtMoney = (n: number | null) =>
   n === null ? '—' : n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${(n / 1e6).toFixed(0)}M`

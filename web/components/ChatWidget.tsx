@@ -40,15 +40,15 @@ export function ChatWidget() {
       <button
         onClick={() => setOpen(o => !o)}
         className="fixed bottom-5 right-5 z-50 bg-accent text-white rounded-pill px-4 py-3 text-sm font-medium shadow-lg hover:bg-accent-light transition-colors"
-        aria-label="Open KKR Research Guide"
+        aria-label="Open Research Guide"
       >
-        {open ? '✕ Close' : '💬 KKR Research Guide'}
+        {open ? '✕ Close' : '💬 Research Guide'}
       </button>
 
       {open && (
         <div className="fixed bottom-20 right-5 z-50 w-[min(92vw,380px)] max-h-[70vh] flex flex-col bg-bg-elevated border border-[rgba(0,163,224,0.3)] rounded-card shadow-2xl">
           <div className="px-4 py-3 border-b border-[rgba(0,163,224,0.15)]">
-            <p className="text-sm font-semibold text-text-primary">KKR Research Guide</p>
+            <p className="text-sm font-semibold text-text-primary">Research Guide</p>
             <p className="text-[11px] text-text-muted">Ask about the data or how the tool works — answers grounded in the dataset.</p>
           </div>
 

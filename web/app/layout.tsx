@@ -4,7 +4,7 @@ import { ChatWidget } from '@/components/ChatWidget'
 import { Onboarding } from '@/components/Onboarding'
 
 export const metadata: Metadata = {
-  title: 'KKR RIA Intelligence',
+  title: 'RIA Intelligence',
   description: 'Ranked RIA call queue + grounded pre-meeting briefs from public SEC Form ADV data.',
 }
 
@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans min-h-screen bg-bg">
         <header className="bg-bg-secondary border-b border-[rgba(0,163,224,0.25)] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-bold tracking-tight text-accent text-xl">KKR</span>
+            <span className="text-accent text-xl leading-none">◎</span>
             <div>
               <h1 className="text-sm font-semibold text-text-primary leading-tight">RIA Intelligence</h1>
               <p className="text-[11px] text-text-muted leading-tight">
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="px-6 py-6 max-w-7xl mx-auto min-h-[70vh]">{children}</main>
         <footer className="border-t border-[rgba(0,163,224,0.15)] px-6 py-4 mt-8">
           <p className="text-[11px] text-text-dim max-w-7xl mx-auto">
-            KKR RIA Intelligence · Powered by public SEC Form ADV data · Research demo — not investment advice.
+            RIA Intelligence · Powered by public SEC Form ADV data · Research demo — not investment advice.
           </p>
         </footer>
         <ChatWidget />

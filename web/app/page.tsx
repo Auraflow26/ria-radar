@@ -22,7 +22,7 @@ export default async function HomePage() {
         <span className="font-mono text-xs text-text-muted">{firms.length} firms</span>
       </div>
       <p className="text-xs text-text-muted mb-4">
-        Pick a desk lens to re-rank · ★ priority / ✓ called / ⊘ skip to work the queue · click a firm for its grounded brief · or ask the KKR Research Guide (bottom-right).
+        Pick a desk lens to re-rank · ★ priority / ✓ called / ⊘ skip to work the queue · click a firm for its grounded brief · or ask the Research Guide (bottom-right).
       </p>
       <RankedTable firms={firms} />
     </div>

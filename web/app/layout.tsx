@@ -22,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <nav className="flex items-center gap-4">
             <a href="/" className="text-xs text-text-secondary hover:text-accent-light">Ranked list</a>
+            <a href="/ask" className="text-xs text-text-secondary hover:text-accent-light">Ask the data</a>
             <a href="/memo" className="text-xs text-text-secondary hover:text-accent-light">How I&apos;d work it</a>
             <a href="/method" className="text-xs text-text-secondary hover:text-accent-light">Methodology</a>
           </nav>

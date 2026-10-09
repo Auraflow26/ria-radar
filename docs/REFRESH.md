@@ -36,3 +36,7 @@ Rollback: revert the application before the down migration. Dropping the new col
 Use a RIA-scoped Doppler configuration and a read-only service token stored as GitHub Actions secret `DOPPLER_TOKEN`. Names: `APIFY_TOKEN`, `APIFY_MAX_CHARGE_USD`, optional `ANTHROPIC_API_KEY`; publication additionally needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Never put server secrets in `NEXT_PUBLIC_*` variables. The existing Vercel public database key remains read-only.
 
 The workflow prepares monthly artifacts on day 7 and supports manual runs. It intentionally does not publish or send watchlist alerts until the migration and release are reviewed. A missing Doppler token fails explicitly. Repository credentials were missing during this audit, so scheduling alone does not make the live data current.
+
+## Release receipt — 2026-10-09
+
+Migration 0006 was applied to the verified RIA database (`bfzdcyuyilesubtgbhdc`), after backing up its 150 firms and 75 briefs. The October artifact was published: 150 current firms in one generation and 75 matching briefs; anonymous RPC execution is refused. Vercel Root Directory is now `web`, and preview uses public read-only database variables. GitHub DOPPLER_TOKEN now reads only `ria-radar/prd`, containing Apify credentials and its $0.25 per-actor cap; no platform database write key is shared with the scheduled runner. Monthly artifact generation is configured; live publication remains an explicit operation.

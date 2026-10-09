@@ -26,6 +26,6 @@ Root typecheck and Next.js production build pass. Browser checks against the ref
 
 ## Release limits
 
-No migration applied, no production rows published, no merge or deployment. The live dashboard remains on its prior data. Publishing needs the reviewed migration/UI release and a service key verified to belong to the RIA database. GitHub still needs a RIA-scoped Doppler service token. The monthly workflow prepares artifacts only until publication is enabled deliberately.
+No migration applied, no production rows published, no merge or production deployment. GitHub refresh CI passes. Automatic Vercel preview failed before compiling: its project Root Directory is `.` instead of `web`, so it cannot detect Next.js. The project setting remains unchanged; correct it at release. The live dashboard remains on its prior data. Publishing needs the reviewed migration/UI release and a service key verified to belong to the RIA database. GitHub still needs a RIA-scoped Doppler service token. The monthly workflow prepares artifacts only until publication is enabled deliberately.
 
 Data-only template briefs were used in this run; no Anthropic generation charge. All public-source downloads and Apify fallbacks were real. Apify caps were $0.25 per actor, not a measured total bill. Raw downloads, run receipts, ranked CSV/JSON, browser screenshots and test logs are retained locally under `/Users/motalebi/Downloads/ria-radar-audit-2026-10-09/`.

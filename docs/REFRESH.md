@@ -25,7 +25,7 @@ The last command creates `data/refresh-artifact.json`; it does not publish. Brie
 
 1. Verify that `SUPABASE_URL` and the service key belong to the RIA Radar database. Do not copy another application's service key simply because it is available in Doppler.
 2. Review and apply `migrations/0006_atomic_refresh.sql` to that database through its migration process. The runner never applies migrations. Rehearse its down file before applying.
-3. Deploy the matching UI code after the migration. Older briefs without a matching generation are hidden rather than presented beside new scores.
+3. Set the existing Vercel project Root Directory to `web` before its next reviewed deployment. The audit found it set to `.`, so automatic preview builds install the pipeline package and fail with “No Next.js version detected”. This project setting was not changed during the audit. Deploy the matching UI code after the migration. Older briefs without a matching generation are hidden rather than presented beside new scores.
 4. Publish the validated artifact with `npm run publish -- --apply`. This calls a service-role-only RPC: retire the previous visible list, publish the new top 150 and matching briefs together, and retain historical firms/outcomes. Any failed write rolls the entire publication back.
 5. Read back the generation, 150 visible firms and matching briefs; check the home, firm detail and mobile views. Only this verifies the live release.
 

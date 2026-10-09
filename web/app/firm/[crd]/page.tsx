@@ -12,13 +12,13 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
   const crdNum = Number(crd)
 
   const [{ data: firm }, { data: brief }] = await Promise.all([
-    supabase.from('kkr_ria_firms').select('*').eq('crd', crdNum).single(),
+    supabase.from('kkr_ria_firms').select('*').eq('crd', crdNum).eq('is_current', true).single(),
     supabase.from('kkr_ria_briefs').select('*').eq('crd', crdNum).maybeSingle(),
   ])
 
   if (!firm) notFound()
   const f = firm as Firm
-  const b = brief as Brief | null
+  const b = brief && brief.run_snapshot === f.run_snapshot ? brief as Brief : null
 
   const pct = (n: number | null) =>
     n !== null && f.raum_total ? `${Math.round((n / f.raum_total) * 100)}%` : '—'
@@ -74,7 +74,7 @@ export default async function FirmPage({ params }: { params: Promise<{ crd: stri
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-xs uppercase tracking-wide text-gold font-semibold">Pre-meeting brief</h3>
             <span className="font-mono text-[10px] text-text-dim">{b.model}</span>
-            {b.grounded && <span className="font-mono text-[10px] text-success">✓ grounded</span>}
+            {b.grounded && <span className="font-mono text-[10px] text-success">✓ figures checked</span>}
           </div>
           <p className="text-sm text-text-secondary">{b.brief.positioning_summary}</p>
 

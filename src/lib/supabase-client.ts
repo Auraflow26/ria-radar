@@ -78,3 +78,16 @@ export async function insertRows(table: string, rows: unknown[]): Promise<void> 
     throw new Error(`Supabase insert ${table} → HTTP ${res.status}: ${detail.slice(0, 300)}`)
   }
 }
+
+/** Publish the validated artifact in one database transaction. */
+export async function publishRefresh(generation: string, firms: unknown[], briefs: unknown[]): Promise<number> {
+  if (!hasSupabase()) throw new Error('Publishing requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY')
+  const response = await fetch(`${URL}/rest/v1/rpc/publish_kkr_ria_refresh`, {
+    method: 'POST', headers: { apikey: SERVICE_KEY!, Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_generation: generation, p_firms: firms, p_briefs: briefs }),
+  })
+  if (!response.ok) throw new Error(`Refresh publish refused: HTTP ${response.status}; check migration and credentials`)
+  const count: unknown = await response.json()
+  if (count !== firms.length) throw new Error('Publication count not confirmed; read back before retrying')
+  return count as number
+}

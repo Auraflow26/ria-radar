@@ -90,7 +90,11 @@ export function skeletonBrief(s: ScoredFirm): FirmBrief {
     current_alts_footprint:
       s.firm.advisesPrivateFunds && s.firm.privateFundCount
         ? `Advises ${s.firm.privateFundCount} private fund(s) per Form ADV Item 7.B.`
-        : 'No private funds disclosed in Form ADV Item 7.B.',
+        : s.firm.advisesPrivateFunds === true
+          ? 'Advises private funds per Form ADV Item 7.B; count not reported.'
+          : s.firm.advisesPrivateFunds === false
+            ? 'No private funds disclosed in Form ADV Item 7.B.'
+            : 'Private-fund status not reported in Form ADV Item 7.B.',
     suggested_angle: 'Generated without LLM (no API key) — see score components above for the data-driven angle.',
     conversation_starters: [
       'How are you currently sourcing and diligencing private-market allocations?',

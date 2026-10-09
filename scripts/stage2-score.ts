@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { computeScore, partitionFirms } from '../src/lib/scoring.js'
 import { LIST_TOP_N } from '../config/scoring.js'
 import { writeRankedCsv, writeRankedHtml } from '../src/lib/report.js'
-import { persistRankedFirms, hasSupabase, fetchOutcomeTallies } from '../src/lib/persist.js'
+import { fetchOutcomeTallies } from '../src/lib/persist.js'
 import type { AdvFirm, Enrichment, ScoredFirm } from '../src/types.js'
 
 export async function runScore(): Promise<void> {
@@ -36,15 +36,6 @@ export async function runScore(): Promise<void> {
 
   console.log('  ✓ data/scored.json + output/ranked-rias.{csv,html} (top 200 / top 100)')
 
-  // [KKR-RIA] persist ranked firms to Supabase (opt-in; no-op when SUPABASE_* unset)
-  if (hasSupabase()) {
-    try {
-      const n = await persistRankedFirms(scored.slice(0, LIST_TOP_N), meta.snapshot)
-      console.log(`  ✓ persisted ${n} ranked firms → Supabase (kkr_ria_firms)`)
-    } catch (err) {
-      console.warn(`  ⚠ Supabase persist failed (continuing file-only): ${(err as Error).message}`)
-    }
-  }
   console.log('\n  top 10:')
   for (const [i, s] of scored.slice(0, 10).entries()) {
     const f = s.firm

@@ -76,6 +76,12 @@ export interface Enrichment {
   /** Competing alts managers found on the firm homepage (a BUY signal) */
   competitorHits: string[]
   websiteFetchedAt: string | null
+  /** Actual acquisition time and method; cached reads keep the original timestamp. */
+  websiteSource?: 'http' | 'apify'
+  websiteUrl?: string
+  apifyRunId?: string
+  apifyDatasetId?: string
+  pdfFetchedAt?: string
 }
 
 export interface ExcludedFirm {

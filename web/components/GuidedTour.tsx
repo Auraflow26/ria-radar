@@ -36,7 +36,7 @@ const STOPS: Stop[] = [
   {
     anchor: null,
     title: 'Every brief is grounded',
-    body: "Click any firm for its pre-meeting brief. Every number traces to that firm's own SEC filing — the 'grounded' badge means it passed a hallucination check.",
+    body: "Click any firm for its pre-meeting brief. The 'figures checked' badge means financial quantities matched the source context. Qualitative interpretations still need your review.",
   },
   {
     anchor: null,

@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import { BRIEF_TOP_N_DEFAULT } from '../config/scoring.js'
 import { generateBrief, hasApiKey, MODEL } from '../src/lib/claude.js'
 import { buildFirmContext, renderBriefHtml, skeletonBrief } from '../src/lib/brief.js'
-import { persistBrief, hasSupabase } from '../src/lib/persist.js'
+import { unsupportedFigures } from '../src/lib/grounding.js'
 import type { ScoredFirm } from '../src/types.js'
 
 const slug = (s: string) =>
@@ -20,8 +20,11 @@ export async function runBriefs(topN = BRIEF_TOP_N_DEFAULT): Promise<void> {
   const targets = scored.slice(0, topN)
 
   mkdirSync('output/briefs', { recursive: true })
+  // This directory contains generated output only; never leave last month's briefs in this run.
+  for (const name of readdirSync('output/briefs')) if (name.endsWith('.html')) unlinkSync(join('output/briefs', name))
   const contexts: Record<string, string> = {}
   const indexRows: string[] = []
+  const published: unknown[] = []
 
   for (const [i, s] of targets.entries()) {
     const rank = i + 1
@@ -29,7 +32,10 @@ export async function runBriefs(topN = BRIEF_TOP_N_DEFAULT): Promise<void> {
     contexts[s.firm.crd] = context
 
     const llmBrief = hasApiKey() ? await generateBrief(context) : null
-    const brief = llmBrief ?? skeletonBrief(s)
+    const generated = llmBrief && unsupportedFigures(JSON.stringify(llmBrief), context).length === 0 ? llmBrief : null
+    const brief = generated ?? skeletonBrief(s)
+    const failures = unsupportedFigures(JSON.stringify(brief), context)
+    if (failures.length) throw new Error(`Brief figures refused for CRD ${s.firm.crd}: ${failures.join(', ')}`)
     const html = renderBriefHtml(s, brief, { rank, screened: meta.rosterTotal, snapshot: meta.snapshot })
     const file = `${String(rank).padStart(2, '0')}-${s.firm.crd}-${slug(s.firm.name)}.html`
     writeFileSync(join('output/briefs', file), html)
@@ -39,23 +45,12 @@ export async function runBriefs(topN = BRIEF_TOP_N_DEFAULT): Promise<void> {
         .join(', ')}</span></li>`,
     )
 
-    // [KKR-RIA] persist brief to Supabase (opt-in; no-op when unset). The
-    // authoritative grounding verdict comes from the validate stage; we record
-    // the source context here so that gate can re-check from the DB if needed.
-    if (hasSupabase()) {
-      try {
-        await persistBrief(s.firm.crd, rank, brief, context, {
-          model: llmBrief ? MODEL : 'skeleton',
-          grounded: true,
-        })
-      } catch (err) {
-        console.warn(`  ⚠ Supabase brief persist failed for ${s.firm.name}: ${(err as Error).message}`)
-      }
-    }
+    published.push({ crd: s.firm.crd, rank, brief, source_context: context, model: generated ? MODEL : 'skeleton', grounded: true, run_snapshot: meta.snapshot })
     console.log(`  ✓ [${rank}/${targets.length}] ${s.firm.name}`)
   }
 
   writeFileSync('data/brief-contexts.json', JSON.stringify(contexts))
+  writeFileSync('data/briefs.json', JSON.stringify(published))
   writeFileSync(
     'output/briefs/index.html',
     `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>RIA Radar — briefs</title>

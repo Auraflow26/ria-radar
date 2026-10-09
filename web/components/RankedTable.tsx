@@ -63,7 +63,7 @@ export function RankedTable({ firms }: { firms: Firm[] }) {
       const parsed: Record<string, number> = {}
       for (const pair of w.split(',')) {
         const [k, v] = pair.split(':')
-        if (k && v && !Number.isNaN(Number(v))) parsed[k] = Number(v)
+        if (SIGNAL_LABELS.some(s => s.key === k) && v && Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) <= 40) parsed[k] = Number(v)
       }
       if (Object.keys(parsed).length) { setCustom(parsed); setLensId('custom') }
     }

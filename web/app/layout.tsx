@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-sans min-h-screen bg-bg">
-        <header className="bg-bg-secondary border-b border-[rgba(0,163,224,0.25)] px-6 py-4 flex items-center justify-between">
+        <header className="bg-bg-secondary border-b border-[rgba(0,163,224,0.25)] px-6 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="text-accent text-xl leading-none">◎</span>
             <div>
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </p>
             </div>
           </div>
-          <nav className="flex items-center gap-5">
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <a href="/" className="text-xs text-text-secondary hover:text-accent">Call queue</a>
             <a href="/watch" className="text-xs text-text-secondary hover:text-accent">Alerts</a>
             <a href="/ask" className="text-xs text-text-secondary hover:text-accent">Ask the data</a>

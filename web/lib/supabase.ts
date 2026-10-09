@@ -53,6 +53,7 @@ export interface Firm {
 }
 
 export interface Brief {
+  run_snapshot: string | null
   crd: number
   rank: number
   model: string

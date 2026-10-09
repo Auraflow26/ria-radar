@@ -22,6 +22,7 @@ function parseArgs(argv: string[]) {
     dryRun: false,
     offline: false,
     withBulk: false,
+    refresh: false,
   }
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i]
@@ -33,6 +34,7 @@ function parseArgs(argv: string[]) {
     } else if (a === '--top') args.top = Number.parseInt(argv[++i] ?? '', 10)
     else if (a === '--dry-run') args.dryRun = true
     else if (a === '--offline') args.offline = true
+    else if (a === '--refresh') args.refresh = true
     else if (a === '--with-bulk') args.withBulk = true
     else throw new Error(`unknown flag: ${a}`)
   }
@@ -53,7 +55,7 @@ if (args.dryRun) {
 for (const stage of args.stages) {
   if (stage === 'ingest') await (await import('./stage1-ingest.js')).runIngest({ withBulk: args.withBulk })
   else if (stage === 'score') await (await import('./stage2-score.js')).runScore()
-  else if (stage === 'enrich') await (await import('./stage3-enrich.js')).runEnrich(args.top)
+  else if (stage === 'enrich') await (await import('./stage3-enrich.js')).runEnrich(args.top, { refresh: args.refresh })
   else if (stage === 'briefs') await (await import('./stage4-briefs.js')).runBriefs(args.top)
   else if (stage === 'validate') {
     const { runValidation, printValidationReport } = await import('../src/lib/validation.js')

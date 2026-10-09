@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { unsupportedFigures } from './grounding.js'
 import type { ScoredFirm } from '../types.js'
 
 export type CheckStatus = 'pass' | 'warn' | 'fail'
@@ -99,37 +100,20 @@ export function runValidation(): Check[] {
     })
 
     const contexts = loadJson<Record<string, string>>('data/brief-contexts.json')
-    if (contexts) {
-      let hallucinated = 0
-      const offenders: string[] = []
-      for (const file of briefFiles) {
-        const crd = file.match(/-(\d+)-/)?.[1]
-        const context = crd ? contexts[crd] : undefined
-        if (!context) continue
-        const html = readFileSync(join(briefsDir, file), 'utf8')
-        const briefBody = html.replace(/<[^>]+>/g, ' ')
-        const normalize = (s: string) => s.replace(/[,\s]/g, '')
-        const ctxNorm = normalize(context)
-        // Every dollar figure AND every percentage must trace verbatim to source —
-        // a hallucinated "72% HNW" is as damaging as a hallucinated $-figure.
-        const dollarFigs = briefBody.match(/\$[\d,.]+\s*(?:billion|million|B|M)?/gi) ?? []
-        const pctFigs = briefBody.match(/\b\d{1,3}(?:\.\d+)?\s*%/g) ?? []
-        for (const fig of [...dollarFigs, ...pctFigs]) {
-          // strip a sentence-final period the regex greedily captured ("$465,000." → "$465000")
-          const probe = normalize(fig).replace(/(billion|million|B|M)$/i, '').replace(/\.$/, '')
-          if (!ctxNorm.includes(probe)) {
-            hallucinated++
-            offenders.push(`${file}: ${fig.trim()}`)
-            break
-          }
-        }
-      }
-      checks.push({
-        name: 'briefs: grounding (figures traceable to source)',
-        status: hallucinated === 0 ? 'pass' : 'fail',
-        detail: hallucinated === 0 ? 'every dollar figure and percentage appears in its source context' : `ungrounded figures: ${offenders.join('; ')}`,
-      })
+    const offenders: string[] = []
+    for (const file of briefFiles) {
+      const crd = file.match(/-(\d+)-/)?.[1]
+      const context = crd ? contexts?.[crd] : undefined
+      const body = readFileSync(join(briefsDir, file), 'utf8').replace(/<[^>]+>/g, ' ')
+      const unsupported = unsupportedFigures(body, context)
+      if (unsupported.length) offenders.push(`${file}: ${unsupported.join(', ')}`)
     }
+    checks.push({
+      name: 'briefs: grounding (figures traceable to source)',
+      status: offenders.length === 0 && briefFiles.length > 0 ? 'pass' : 'fail',
+      detail: offenders.length ? offenders.join('; ') : `${briefFiles.length} briefs checked; numeric traceability only`,
+    })
+
   }
 
   return checks

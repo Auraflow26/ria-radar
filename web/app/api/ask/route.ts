@@ -19,7 +19,7 @@ HOW THE TOOL WORKS (use this to guide users):
 - The funnel: ~16,900 SEC filings → ~2,000 in-scope wealth-channel firms → all scored → top 75 enriched with the live ADV PDF (custodians, Schedule D 7.B fund detail) + a homepage scan → top firms get a one-page grounded brief. The published list shows the top 150.
 - The score (0–100) is DETERMINISTIC — eight weighted signals from the ADV: existing private-fund exposure, HNW client mix (the two heaviest), AUM scale, custodian platform access, discretionary ratio, website alts language, AUM growth, and a coverage-feedback signal from logged call outcomes. Weights renormalize over whatever a firm reports, so missing data lowers confidence, never invents a penalty.
 - Desk lenses: the list re-ranks instantly by coverage thesis — Balanced (house view), Private credit desk (alts machinery + custody), Private equity desk (HNW + scale), Real estate/income desk (HNW + discretionary). Same universe, different priorities. Tell users to use the "Rank for" buttons at the top of the list.
-- Briefs: the top 75 firms have a pre-meeting brief (positioning, why-alts-ready, current footprint, suggested angle, conversation starters). Every number in a brief is checked against the source filing by a grounding gate — if it doesn't trace, the brief is rejected. That's why the briefs are client-safe.
+- Briefs: the top 75 firms have a pre-meeting brief (positioning, why-alts-ready, current footprint, suggested angle, conversation starters). Financial quantities in a brief are checked against its source context before publication. This does not verify qualitative claims; treat them as research requiring review.
 - Pages: "Ranked list" (home, with lenses + filters), each firm's detail page (brief + score breakdown + "view source data"), "How I'd work it" (analyst memo), "Methodology".
 
 HARD RULES:
@@ -58,6 +58,7 @@ export async function POST(req: Request) {
   const { data } = await sb
     .from('kkr_ria_firms')
     .select('rank,name,city,state,score,raum_total,private_fund_count,enrichment')
+    .eq('is_current', true)
     .order('rank', { ascending: true })
     .limit(150)
 

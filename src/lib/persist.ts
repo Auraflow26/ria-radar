@@ -27,9 +27,8 @@ export async function fetchOutcomeTallies(): Promise<Record<number, OutcomeTally
 }
 
 /** Upsert the ranked firm list. No-op when Supabase is unconfigured. */
-export async function persistRankedFirms(ranked: ScoredFirm[], snapshot: string): Promise<number> {
-  if (!hasSupabase()) return 0
-  const rows = ranked.map((r, i) => {
+export function rankedFirmRows(ranked: ScoredFirm[], snapshot: string) {
+  return ranked.map((r, i) => {
     const f = r.firm
     return {
       crd: f.crd,
@@ -51,6 +50,11 @@ export async function persistRankedFirms(ranked: ScoredFirm[], snapshot: string)
       enrichment: r.enrichment ?? null,
     }
   })
+}
+
+export async function persistRankedFirms(ranked: ScoredFirm[], snapshot: string): Promise<number> {
+  if (!hasSupabase()) return 0
+  const rows = rankedFirmRows(ranked, snapshot)
   await upsert('kkr_ria_firms', rows, 'crd')
   return rows.length
 }

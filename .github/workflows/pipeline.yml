@@ -1,14 +1,14 @@
 # [KKR-RIA] Scheduled pipeline refresh — production roadmap step 4.
-# Quarterly (or on-demand) full run: ingest → score → enrich → briefs → persist
-# → validate. Secrets come from Doppler via a read-only service token; the
+# Monthly (or on-demand) run: ingest → score → enrich → briefs → validate
+# → prepare a publication artifact. Secrets come from Doppler via a read-only service token; the
 # grounding gate is the hard gate — a red run fails the workflow.
 
 name: RIA Radar pipeline
 
 on:
   schedule:
-    # 06:00 UTC on the 1st of Jan, Apr, Jul, Oct (quarterly, after month-end ADV roster posts)
-    - cron: '0 6 1 1,4,7,10 *'
+    # Monthly on day 7; source discovery uses the latest files actually published.
+    - cron: '0 6 7 * *'
   workflow_dispatch:
     inputs:
       top:
@@ -39,27 +39,39 @@ jobs:
 
       - run: npm ci
 
+      - name: Verify refresh credentials are configured
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: test -n "$DOPPLER_TOKEN" || { echo "Set a RIA-scoped Doppler service token before refreshing"; exit 1; }
+
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v3
 
-      - name: Run pipeline (ingest → score → enrich → briefs → persist)
+      - name: Run pipeline (ingest → score → enrich → briefs)
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          TOP: ${{ github.event.inputs.top || '75' }}
         run: |
-          TOP="${{ github.event.inputs.top || '75' }}"
+          [[ "$TOP" =~ ^[0-9]+$ ]] && (( TOP >= 1 && TOP <= 150 )) || { echo "top must be 1..150"; exit 1; }
           BULK=""
           if [ "${{ github.event.inputs.with_bulk }}" = "true" ]; then BULK="--with-bulk"; fi
           doppler run -- npx tsx scripts/run.ts $BULK --stage ingest,score
-          doppler run -- npx tsx scripts/run.ts --stage enrich --top "$TOP"
-          doppler run -- npx tsx scripts/run.ts --stage briefs --top 10
+          doppler run -- npx tsx scripts/run.ts --stage enrich --top "$TOP" --refresh
+          doppler run -- npx tsx scripts/run.ts --stage briefs --top "$TOP"
 
       - name: Validation gate (hard fail on red)
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: doppler run -- npx tsx scripts/validate.ts
 
+      - name: Prepare validated publication artifact (no database writes)
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: doppler run -- npx tsx scripts/publish.ts
+
+      # Publication remains manual until migration 0006 and release are reviewed.
       - name: Watchlist — diff filings, raise ADV-change alerts, push to Slack
-        if: success()
+        if: false # enable only with reviewed publication/cutover
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: doppler run -- npx tsx scripts/watch.ts
@@ -73,4 +85,6 @@ jobs:
             output/ranked-rias.csv
             output/ranked-rias.html
             output/briefs/
+            data/refresh-artifact.json
+            data/source-manifest.json
           retention-days: 30

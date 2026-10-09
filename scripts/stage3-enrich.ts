@@ -1,10 +1,11 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { ENRICH_TOP_N_DEFAULT } from '../config/scoring.js'
-import { fetchAdvPdf, fetchHomepage } from '../src/lib/sec-client.js'
+import { fetchAdvPdf, fetchHomepageRecord } from '../src/lib/sec-client.js'
 import { extractFromAdvPdf } from '../src/lib/pdf-extract.js'
 import { htmlToText, scanAltsText } from '../src/lib/web-enrich.js'
 import { looksLikeEmptyShell, fetchHomepageViaApify } from '../src/lib/apify-client.js'
 import { planEnrichment, agenticEnabled } from '../src/lib/enrich-agent.js'
+import { isFresh, normalizeWebsite } from '../src/lib/freshness.js'
 import type { Enrichment, ScoredFirm } from '../src/types.js'
 
 /**
@@ -13,7 +14,7 @@ import type { Enrichment, ScoredFirm } from '../src/types.js'
  * alts language. Every failure skips that signal for that firm, never crashes.
  * Re-runs stage 2 afterwards so the ranked outputs reflect enrichment.
  */
-export async function runEnrich(topN = ENRICH_TOP_N_DEFAULT): Promise<void> {
+export async function runEnrich(topN = ENRICH_TOP_N_DEFAULT, opts: { refresh?: boolean } = {}): Promise<void> {
   console.log(`stage 3 — enrich top ${topN}`)
   const scored: ScoredFirm[] = JSON.parse(readFileSync('data/scored.json', 'utf8'))
   const targets = scored.slice(0, topN)
@@ -51,18 +52,23 @@ export async function runEnrich(topN = ENRICH_TOP_N_DEFAULT): Promise<void> {
     // [KKR-RIA] agentic plan: which actions to run for this firm (or deterministic default)
     const plan = await planEnrichment(s)
 
-    if (enrichment.custodianSource === 'none' && plan.fetch_pdf) {
+    if (plan.fetch_pdf && (opts.refresh || enrichment.custodianSource !== 'adv-pdf' || !isFresh(enrichment.pdfFetchedAt))) {
       try {
-        const pdf = await fetchAdvPdf(firm.crd)
+        const pdf = await fetchAdvPdf(firm.crd, opts)
         const { custodians, fundDetail } = await extractFromAdvPdf(pdf)
         enrichment.custodians = custodians
         enrichment.fundDetail = fundDetail
         enrichment.custodianSource = 'adv-pdf'
+        enrichment.pdfFetchedAt = JSON.parse(readFileSync(`data/pdfs/${firm.crd}.pdf.receipt.json`, 'utf8')).fetchedAt
         pdfOk++
       } catch (err) {
+        enrichment.custodianSource = 'none'
+        enrichment.custodians = []
+        delete enrichment.fundDetail
+        delete enrichment.pdfFetchedAt
         console.warn(`  ⚠ [${i + 1}/${targets.length}] ADV PDF failed for ${firm.name} (CRD ${firm.crd}): ${(err as Error).message}`)
       }
-    } else {
+    } else if (enrichment.custodianSource === 'adv-pdf') {
       pdfOk++
     }
 
@@ -76,25 +82,33 @@ export async function runEnrich(topN = ENRICH_TOP_N_DEFAULT): Promise<void> {
       bulkOk++
     }
 
-    if (enrichment.websiteFetchedAt === null && firm.website && plan.fetch_homepage) {
+    if (firm.website && plan.fetch_homepage && (opts.refresh || !isFresh(enrichment.websiteFetchedAt) || enrichment.websiteUrl !== normalizeWebsite(firm.website))) {
       try {
-        const html = await fetchHomepage(firm.crd, firm.website) // free raw fetch first
-        let text = htmlToText(html)
-        if (looksLikeEmptyShell(html)) {
-          // raw fetch got an SPA shell — escalate to Apify (JS render)
-          try {
-            text = await fetchHomepageViaApify(firm.crd, firm.website)
-            console.log(`  ↑ apify fallback used for ${firm.name}`)
-          } catch (e) {
-            console.warn(`  ⚠ apify fallback failed for ${firm.name}: ${(e as Error).message} — using raw text`)
-          }
+        const raw = await fetchHomepageRecord(firm.crd, firm.website, opts)
+        let text = htmlToText(raw.html)
+        let fetchedAt = raw.fetchedAt
+        enrichment.websiteSource = 'http'
+        delete enrichment.apifyRunId
+        delete enrichment.apifyDatasetId
+        if (looksLikeEmptyShell(raw.html)) {
+          const rendered = await fetchHomepageViaApify(firm.crd, firm.website, opts)
+          text = rendered.text
+          fetchedAt = rendered.fetchedAt
+          enrichment.websiteSource = 'apify'
+          enrichment.apifyRunId = rendered.runId
+          enrichment.apifyDatasetId = rendered.datasetId
+          console.log(`  ↑ apify run ${rendered.runId} for ${firm.name}`)
         }
         const scan = scanAltsText(text)
         enrichment.structureHits = scan.structureHits
         enrichment.competitorHits = scan.competitorHits
-        enrichment.websiteFetchedAt = new Date().toISOString().slice(0, 10)
+        enrichment.websiteFetchedAt = fetchedAt
+        enrichment.websiteUrl = normalizeWebsite(firm.website)
         webOk++
       } catch (err) {
+        enrichment.websiteFetchedAt = null
+        enrichment.structureHits = []
+        enrichment.competitorHits = []
         console.warn(`  ⚠ [${i + 1}/${targets.length}] homepage failed for ${firm.name}: ${(err as Error).message}`)
       }
     } else if (enrichment.websiteFetchedAt !== null) {

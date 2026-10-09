@@ -1,4 +1,5 @@
 import { AUM_BAND, DISQUALIFIERS, SIGNALS } from '../../config/scoring.js'
+import { isFresh } from './freshness.js'
 import type { AdvFirm, Enrichment, ExcludedFirm, ScoreComponent, ScoredFirm } from '../types.js'
 
 const fmtMoney = (n: number) =>
@@ -143,8 +144,8 @@ export function computeScore(
   }
 
   // 5. custodian — stage-3 enrichment only
-  if (!enrichment || enrichment.custodianSource === 'none') {
-    components.push(missing('custodian', 'Custodians not yet extracted (stage 3)'))
+  if (!enrichment || enrichment.custodianSource !== 'adv-pdf' || !isFresh(enrichment.pdfFetchedAt)) {
+    components.push(missing('custodian', 'No current custodian extraction (stage 3)'))
   } else if (enrichment.custodians.length === 0) {
     components.push(missing('custodian', 'No custodian names found in ADV PDF'))
   } else {
@@ -169,8 +170,8 @@ export function computeScore(
 
   // 7. web_language — stage-3 enrichment: vehicle structures + competitor traces.
   // A competitor on the shelf is a BUY signal: the firm has already done alts onboarding.
-  if (!enrichment || enrichment.websiteFetchedAt === null) {
-    components.push(missing('web_language', 'Website not yet scanned (stage 3)'))
+  if (!enrichment || !isFresh(enrichment.websiteFetchedAt)) {
+    components.push(missing('web_language', 'No current website scan (stage 3)'))
   } else {
     const structures = enrichment.structureHits
     const competitors = enrichment.competitorHits

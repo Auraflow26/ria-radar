@@ -1,5 +1,5 @@
-import { writeFileSync, mkdirSync } from 'node:fs'
-import { CURRENT_MONTH, PRIOR_MONTH } from '../config/sources.js'
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
+import { resolveMonthlySources } from '../src/lib/monthly-sources.js'
 import { INGEST_FILTER } from '../config/scoring.js'
 import { fetchMonthlyRoster } from '../src/lib/sec-client.js'
 import { parseRosterCsv } from '../src/lib/adv-parser.js'
@@ -14,6 +14,7 @@ function inIngestScope(f: AdvFirm): boolean {
 }
 
 export async function runIngest(opts: { withBulk?: boolean } = {}): Promise<void> {
+  const { current: CURRENT_MONTH, prior: PRIOR_MONTH } = await resolveMonthlySources()
   console.log(`stage 1 — ingest (${CURRENT_MONTH.label} + ${PRIOR_MONTH.label})`)
 
   const currentCsv = await fetchMonthlyRoster(CURRENT_MONTH)
@@ -31,7 +32,7 @@ export async function runIngest(opts: { withBulk?: boolean } = {}): Promise<void
   writeFileSync('data/firms-prior.json', JSON.stringify(prior))
   writeFileSync(
     'data/ingest-meta.json',
-    JSON.stringify({ snapshot: CURRENT_MONTH.label, prior: PRIOR_MONTH.label, rosterTotal: all.length, inScope: firms.length }),
+    JSON.stringify({ snapshot: CURRENT_MONTH.label, prior: PRIOR_MONTH.label, rosterTotal: all.length, inScope: firms.length, acquiredAt: JSON.parse(readFileSync(`data/raw/${CURRENT_MONTH.label}.receipt.json`, 'utf8')).fetchedAt, currentSource: CURRENT_MONTH.url, priorSource: PRIOR_MONTH.url }),
   )
   console.log(`  ✓ data/firms.json (${firms.length.toLocaleString()}) + data/firms-prior.json (${prior.length.toLocaleString()})`)
 

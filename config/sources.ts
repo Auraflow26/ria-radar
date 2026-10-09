@@ -15,16 +15,16 @@ export interface MonthlySource {
   url: string
 }
 
-/** Current snapshot — drives the ranked list. */
+/** Verified SEC index links on 2026-10-09; never infer irregular filenames. */
 export const CURRENT_MONTH: MonthlySource = {
-  label: '2026-06',
-  url: `${BULK_BASE}/ia060126_0.zip`,
+  label: '2026-10',
+  url: `${BULK_BASE}/ia100226.zip`,
 }
 
 /** Prior snapshot — joined by CRD for the AUM-growth signal. */
 export const PRIOR_MONTH: MonthlySource = {
-  label: '2026-05',
-  url: `${BULK_BASE}/ia050126.zip`,
+  label: '2026-09',
+  url: `${BULK_BASE}/ia09012026-registered.zip`,
 }
 
 /** Full ADV (Part 1A incl. Schedule D) as PDF, per firm. */

@@ -80,7 +80,8 @@ async function resolvePromptRules(): Promise<string> {
   if (promptRulesCache) return promptRulesCache
   if (process.env.KKR_NAMING === 'local') {
     try {
-      const mod = await import('../../config/kkr-products.local.js')
+      const localModule = '../../config/kkr-products.local.js'
+      const mod = await import(localModule)
       promptRulesCache = `${PROMPT_RULES_KKR_LOCAL}\n${mod.KKR_NAMING_PROMPT}`
       console.log('  ⚙ KKR_NAMING=local — product naming override active (local-only)')
       return promptRulesCache
